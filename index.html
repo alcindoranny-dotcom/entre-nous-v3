@@ -26,6 +26,24 @@ let supabaseClient=null;
 if(window.supabase && SUPABASE_PUBLISHABLE_KEY !== 'COLLER_ICI_LA_CLE_PUBLISHABLE'){
   supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 }
+  async function ensureAnonymousSession(){
+  if(!supabaseClient) return false;
+
+  const {data:{session}} = await supabaseClient.auth.getSession();
+
+  if(session) return true;
+
+  const {error} = await supabaseClient.auth.signInAnonymously();
+
+  if(error){
+    console.error('Connexion anonyme Supabase:', error);
+    return false;
+  }
+
+  return true;
+}
+
+ensureAnonymousSession();
 
 async function testSupabase(){
   const el=document.getElementById('supabaseStatus');
