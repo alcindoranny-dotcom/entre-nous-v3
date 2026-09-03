@@ -70,4 +70,39 @@ let S=JSON.parse(localStorage.getItem('EN34')||'{"sessions":[],"profile":{},"mem
 if(supabaseClient){
   testSupabase();
 }
+function shareInvite(code,method){
+const link=location.origin+location.pathname+'?invite='+code;
+const text='Rejoins-moi sur ENTRE NOUS 💗\n'+link;
+if(method==='whatsapp'){
+location.href='https://wa.me/?text='+encodeURIComponent(text);
+return;
+}
+if(method==='email'){
+location.href='mailto:?subject='+encodeURIComponent('Invitation ENTRE NOUS 💗')+'&body='+encodeURIComponent(text);
+return;
+}
+if(navigator.clipboard){
+navigator.clipboard.writeText(link);
+toast('Lien copié ❤️');
+}else{
+toast('Lien : '+link);
+}
+}
+
+const renderSessionsOriginal=renderSessions;
+renderSessions=function(){
+sessionList.innerHTML=S.sessions.length?S.sessions.map((s,i)=>{
+let share=s.code?
+'<div class="panel" style="margin-top:10px">'+
+'<div class="tag">Lien d’invitation</div>'+
+'<input class="input" value="'+location.origin+location.pathname+'?invite='+s.code+'" readonly>'+
+'<div class="actions">'+
+'<button class="btn" onclick="shareInvite(\''+s.code+'\',\'whatsapp\')">WhatsApp</button>'+
+'<button class="btn ghost" onclick="shareInvite(\''+s.code+'\',\'email\')">E-mail</button>'+
+'</div>'+
+'<button class="btn ghost" style="margin-top:8px" onclick="shareInvite(\''+s.code+'\',\'copy\')">Copier le lien</button>'+
+'</div>':'';
+return '<div class="panel"><span class="badge">'+s.status+'</span><h3>'+s.name+'</h3><p class="small">Progression : '+Math.min(s.i||0,4)+' / 4 cartes</p><div class="actions"><button class="btn" onclick="resume('+i+')">Reprendre</button><button class="btn ghost" onclick="del('+i+')">Supprimer</button></div>'+share+'</div>';
+}).join(''):'<div class="empty">Aucune partie pour le moment.</div>';
+}
 </script></body></html>
