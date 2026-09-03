@@ -15,11 +15,22 @@
 <nav class="nav"><button data-n="home" onclick="go('home')">⌂<br>Accueil</button><button data-n="play" onclick="go('play')">♡<br>Jouer</button><button data-n="sessions" onclick="go('sessions')">▣<br>Parties</button><button data-n="rewards" onclick="go('rewards')">✦<br>Récompenses</button></nav><div id="toast" class="toast"></div></main>
 <script>
 const SUPABASE_URL="https://gnxtuxzqpuynqgdmcaie.supabase.co";
+const SUPABASE_KEY="sb_publishable_a90oxd8BGJ4_zN5lb2hEOQ_KXCbSPGu";
 let sb=null;
 function initSupabase(){
-  const key=localStorage.getItem('EN34_SB_KEY')||'';
-  if(!key){updateSbStatus('Connexion non configurée. Colle ta Publishable key ci-dessus.');return false;}
-  try{sb=window.supabase.createClient(SUPABASE_URL,key);updateSbStatus('Connexion Supabase initialisée.');return true;}catch(e){sb=null;updateSbStatus('Clé invalide ou connexion impossible.');return false;}
+  const key=SUPABASE_KEY;
+  if(!key){
+    updateSbStatus('Connexion non configurée.');
+    return false;
+  }
+  try{
+    sb=window.supabase.createClient(SUPABASE_URL,key);
+    updateSbStatus('Connexion Supabase active.');
+    return true;
+  }catch(e){
+    updateSbStatus('Erreur de connexion Supabase.');
+    return false;
+  }
 }
 function updateSbStatus(t){const el=document.getElementById('sbStatus');if(el)el.textContent=t;}
 function saveSupabaseKey(){
