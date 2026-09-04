@@ -1,108 +1,1310 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#120d10"><title>ENTRE NOUS — V3.4</title><style>
-*{box-sizing:border-box}body{margin:0;background:#100b0e;color:#f8f2ed;font-family:system-ui,-apple-system,Segoe UI,sans-serif}button,input,textarea,select{font:inherit}.app{max-width:560px;margin:auto;min-height:100vh;padding:18px 18px 88px;background:radial-gradient(circle at 50% 0,#3b1e2b,#100b0e 48%)}.top{display:flex;justify-content:space-between;align-items:center}.logo{font-weight:900;letter-spacing:2px}.btn,.card,textarea,input,select{border-radius:14px}.btn{border:0;padding:14px 16px;background:#d58b9f;color:#190e13;font-weight:800;width:100%;cursor:pointer}.ghost{background:transparent;color:#f8f2ed;border:1px solid #5a3c47}.screen{display:none}.active{display:block}.hero{text-align:center;padding:42px 0 25px}.eyebrow,.tag{color:#d99aac;text-transform:uppercase;letter-spacing:2px;font-size:11px}.hero h1,h2,h3,.question{font-family:Georgia,serif;font-weight:500}.hero h1{font-size:52px;line-height:.95;margin:14px 0}.hero h2{font-size:19px;line-height:1.3}.p{color:#c8b9bd;line-height:1.55}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card,.panel{background:#1b1115;border:1px solid #49343b;padding:17px;margin:10px 0}.card{cursor:pointer}.card h3{margin:7px 0;font-size:21px}.card p,.small{color:#a9959b;font-size:12px;line-height:1.5}.back{border:0;background:none;color:#cdbdc1;padding:8px 0}.input,.textarea,select{width:100%;padding:14px;border:1px solid #49343b;background:#1b1115;color:#fff;margin:7px 0 12px}.textarea{min-height:120px}.question{font-size:30px;line-height:1.2;margin:20px 0}.progress{height:6px;background:#2a1d22;border-radius:8px;overflow:hidden}.progress i{display:block;height:100%;width:0;background:#d58b9f}.actions{display:flex;gap:8px}.actions .btn{flex:1}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(560px,100%);display:grid;grid-template-columns:repeat(4,1fr);background:#120d10ee;border-top:1px solid #49343b;padding:8px}.nav button{background:none;border:0;color:#a9959b;font-size:11px}.nav button.active{color:#fff}.badge{display:inline-block;border:1px solid #6a4653;border-radius:999px;padding:5px 8px;color:#d99aac;font-size:10px}.price{font:38px Georgia,serif}.memory{border:1px dashed #6a4653;border-radius:17px;padding:24px;text-align:center}.memory input{display:none}.memory label{display:block}.remote{font-size:30px;letter-spacing:6px;text-align:center;font-weight:900}.empty{padding:22px;border:1px dashed #49343b;border-radius:16px;color:#a9959b}.toast{position:fixed;bottom:75px;left:50%;transform:translate(-50%,20px);opacity:0;background:#24151c;border:1px solid #70505d;border-radius:13px;padding:12px;width:min(420px,90%);text-align:center;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}@media(max-width:390px){.grid{grid-template-columns:1fr}.hero h1{font-size:46px}}
-</style>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ENTRE NOUS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head><body><main class="app"><header class="top"><b class="logo">ENTRE NOUS</b><button class="btn ghost" style="width:auto" onclick="go('account')">Mon espace</button></header>
-<section id="home" class="screen active"><div class="hero"><div class="eyebrow">Des jeux pour créer du lien.</div><h1>ENTRE<br>NOUS</h1><h2>ON JOUE POUR SE DÉCOUVRIR.<br>ON ÉCHANGE POUR SE RAPPROCHER.</h2><p class="p">À deux, entre amis ou en groupe. En présentiel ou à distance. Une question devient une discussion, puis parfois un souvenir.</p><button class="btn" onclick="go('play')">Commencer l'expérience</button><button class="btn ghost" style="margin-top:9px" onclick="go('concept')">Découvrir le concept</button></div><div class="small" style="text-align:center">ENTRE NOUS · version test discrète</div></section>
-<section id="concept" class="screen"><button class="back" onclick="back()">← Retour</button><div class="hero"><div class="eyebrow">Le principe</div><h1>Plus qu'un questionnaire.</h1><p class="p">Une carte déclenche une réponse. Une réponse déclenche une discussion. Et certains moments deviennent des souvenirs.</p></div><div class="panel"><b>🎮 Jouer</b><p class="small">Questions, jeux, défis et découvertes.</p><b>💬 Échanger</b><p class="small">Répondre, passer ou choisir d'en reparler.</p><b>📸 Garder</b><p class="small">Photos, notes, lettres et souvenirs.</p><b>🌍 Se retrouver</b><p class="small">Continuer une expérience même à distance.</p></div><button class="btn" onclick="go('play')">Choisir une expérience</button></section>
-<section id="play" class="screen"><button class="back" onclick="back()">← Retour</button><h2>Choisissez votre expérience</h2><div class="grid"><div class="card" onclick="start('Se découvrir')"><span class="tag">Découverte</span><h3>🌿 Se découvrir</h3><p>Ouvrir la conversation.</p></div><div class="card" onclick="start('Complicité')"><span class="tag">Lien</span><h3>❤️ Complicité</h3><p>Créer du rapprochement.</p></div><div class="card" onclick="start('Amitié')"><span class="tag">Proches</span><h3>🤝 Amitié</h3><p>Rires, anecdotes et souvenirs.</p></div><div class="card" onclick="start('Amour')"><span class="tag">Relation</span><h3>💗 Amour</h3><p>Explorer ce qui compte.</p></div><div class="card" onclick="start('À distance')"><span class="tag">Remote</span><h3>🌍 À distance</h3><p>Jouer quand l'autre est loin.</p></div><div class="card" onclick="start('Souvenirs')"><span class="tag">Mémoire</span><h3>📸 Souvenirs</h3><p>Créer une trace.</p></div><div class="card" onclick="start('Piment')"><span class="tag">Spécifique</span><h3>🔥 Piment</h3><p>Audace + notes privées.</p></div><div class="card" onclick="go('special')"><span class="tag">+1 €</span><h3>✨ Packs spécialisés</h3><p>Couple, Sexfriend, Libertin, 10 ans ou plus.</p></div></div><div class="panel"><span class="badge">PREMIUM</span><div class="price">4,99 €</div><p class="small">4 semaines. Packs spécialisés en complément.</p><button class="btn" onclick="go('pricing')">Voir les offres</button></div></section>
-<section id="special" class="screen"><button class="back" onclick="back()">← Retour</button><h2>Packs spécialisés</h2><div class="grid"><div class="card" onclick="start('Couple')"><h3>❤️ Couple</h3><p>Questions dédiées.</p></div><div class="card" onclick="start('Sexfriend')"><h3>🔥 Sexfriend</h3><p>Attentes et limites.</p></div><div class="card" onclick="start('Libertin')"><h3>🖤 Libertin</h3><p>Règles et confiance.</p></div><div class="card" onclick="start('10 ans ou plus')"><h3>💍 10 ans ou plus</h3><p>Réinventer la conversation.</p></div></div><button class="btn" onclick="go('pricing')">Voir les offres</button></section>
-<section id="game" class="screen"><button class="back" onclick="quit()">← Retour</button><div class="tag" id="round"></div><div class="progress"><i id="bar"></i></div><div class="question" id="question"></div><textarea id="answer" class="textarea" placeholder="Écris ta réponse ici…"></textarea><div class="actions"><button class="btn" onclick="saveAnswer()">Enregistrer ma réponse ❤️</button><button class="btn ghost" onclick="skip()">Je passe</button></div><button class="btn ghost" style="margin-top:8px" onclick="discuss()">💬 On en rediscute</button><p class="small" id="meta"></p></section>
-<section id="finish" class="screen"><div class="hero"><div class="eyebrow">Expérience terminée</div><h1>SUPER<br>SOUVENIR</h1><p class="p">Garde une trace de ce moment.</p></div><div class="panel"><div class="memory"><div style="font-size:42px">📷</div><b>Ajouter un souvenir</b><p class="small">Choisir une photo ou ouvrir directement l'appareil photo.</p><label class="btn" for="photo">📸 Ajouter une photo</label><input id="photo" type="file" accept="image/*" capture="environment" onchange="toast('Photo sélectionnée')"></div><textarea id="note" class="textarea" placeholder="Une petite phrase pour vous souvenir de ce moment…"></textarea><button class="btn" onclick="saveMemory()">Garder dans mes souvenirs</button></div><button class="btn ghost" onclick="go('rewards')">Voir mes récompenses</button></section>
-<section id="sessions" class="screen"><h2>Mes parties</h2><div id="sessionList"></div><div class="panel"><h3>Inviter quelqu'un</h3><input id="inviteName" class="input" placeholder="Prénom ou nom"><select id="inviteExp" class="input"><option>Se découvrir</option><option>Complicité</option><option>À distance</option><option>Piment</option></select><button class="btn" onclick="invite()">Créer une invitation</button></div></section>
-<section id="remote" class="screen"><button class="back" onclick="back()">← Retour</button><h2>Jouer à distance</h2><div class="panel"><p class="small">Un code permet de rejoindre la partie sur un autre téléphone. La synchronisation serveur sera branchée ici.</p><input id="remoteName" class="input" placeholder="Nom de la personne"><button class="btn" onclick="remoteCreate()">Créer la partie</button></div><div id="remoteOut"></div><div class="panel"><h3>Rejoindre</h3><input id="join" class="input" placeholder="Code d'invitation"><button class="btn ghost" onclick="remoteJoin()">Rejoindre</button></div></section>
-<section id="rewards" class="screen"><h2>Récompenses</h2><div class="panel"><h3>🌱 Premier lien</h3><p class="small">Première expérience terminée.</p></div><div class="panel"><h3>💬 On en rediscute</h3><p class="small">Une réponse transformée en conversation.</p></div><div class="panel"><h3>📸 Super souvenir</h3><p class="small">Un souvenir conservé.</p></div><div class="panel"><h3>🌍 Malgré la distance</h3><p class="small">Une expérience à distance.</p></div></section>
-<section id="pricing" class="screen"><button class="back" onclick="back()">← Retour</button><h2>Mon accès</h2><div class="panel"><span class="badge">4 SEMAINES</span><div class="price">4,99 €</div><button class="btn" onclick="pick('4,99 € / 4 semaines')">Choisir</button></div><div class="panel"><span class="badge">3 MOIS</span><div class="price">12,99 €</div><button class="btn" onclick="pick('12,99 € / 3 mois')">Choisir</button></div><div class="panel"><span class="badge">4 MOIS + 1 OFFERT</span><div class="price">15,99 €</div><button class="btn" onclick="pick('15,99 € / 4 mois + 1 mois offert')">Choisir</button></div><p class="small">Paiement réel à connecter avec Stripe. Les droits Premium devront être vérifiés côté serveur.</p></section>
-<section id="account" class="screen"><button class="back" onclick="back()">← Retour</button><h2>Mon espace</h2><div class="panel"><input id="profile" class="input" placeholder="Mon prénom"><button class="btn" onclick="profileSave()">Enregistrer</button></div><div class="panel"><b>☁️ Connexion ENTRE NOUS</b><p class="small" id="supabaseStatus">Connexion Supabase en préparation…</p><button class="btn ghost" onclick="testSupabase()">Tester la connexion</button></div><button class="btn ghost" onclick="go('sessions')">📋 Mes parties</button><button class="btn ghost" style="margin-top:8px" onclick="go('rewards')">🏆 Récompenses</button></section>
-<nav class="nav"><button data-n="home" onclick="go('home')">⌂<br>Accueil</button><button data-n="play" onclick="go('play')">♡<br>Jouer</button><button data-n="sessions" onclick="go('sessions')">▣<br>Parties</button><button data-n="rewards" onclick="go('rewards')">✦<br>Récompenses</button></nav><div id="toast" class="toast"></div></main>
+<style>
+:root{--bg:#100b0f;--panel:#1b1117;--line:#49343d;--pink:#d98da3;--text:#fff;--muted:#b9a8ae}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top,#281521 0,#100b0f 48%,#0b080a 100%);color:var(--text);font-family:system-ui,-apple-system,sans-serif}
+.app{width:min(620px,100%);min-height:100vh;margin:auto;padding:18px 16px 92px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.logo{letter-spacing:3px;font-size:15px}
+.screen{display:none}
+.screen.active{display:block}
+.hero{padding:24px 4px}
+.eyebrow{color:var(--pink);text-transform:uppercase;letter-spacing:2px;font-size:11px}
+.hero h1{font:52px Georgia,serif;line-height:.95;margin:12px 0 18px}
+.hero h2{font-size:18px;line-height:1.35}
+.p{color:#d1c2c7;line-height:1.55}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card,.panel{background:rgba(27,17,23,.9);border:1px solid var(--line);border-radius:18px;padding:17px;margin:10px 0}
+.card{cursor:pointer}
+.card h3{margin:5px 0 8px;font-size:19px}
+.card p,.small,.fine{color:var(--muted);font-size:12px;line-height:1.5}
+.btn{width:100%;border:0;border-radius:13px;padding:13px 14px;background:var(--pink);color:#160b10;font-weight:800;cursor:pointer}
+.btn.ghost{background:transparent;color:#fff;border:1px solid var(--line)}
+.actions{display:flex;gap:8px}
+.actions .btn{flex:1}
+.input,.textarea,select{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:#120c10;color:#fff;margin:7px 0 12px}
+.textarea{min-height:130px;resize:vertical}
+.question{font:30px Georgia,serif;line-height:1.18;margin:24px 0}
+.progress{height:6px;background:#2a1d22;border-radius:8px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--pink);width:0}
+.badge,.chip{display:inline-block;border:1px solid #6a4653;border-radius:999px;padding:5px 9px;color:#e1a5b7;font-size:10px;margin:3px}
+.remote{font-size:30px;letter-spacing:5px;text-align:center;font-weight:900}
+.empty{padding:22px;border:1px dashed var(--line);border-radius:16px;color:var(--muted)}
+.nav{position:fixed;z-index:10;bottom:0;left:50%;transform:translateX(-50%);width:min(620px,100%);display:grid;grid-template-columns:repeat(4,1fr);background:#100b0fee;border-top:1px solid var(--line);padding:8px env(safe-area-inset-right) calc(8px + env(safe-area-inset-bottom)) env(safe-area-inset-left);backdrop-filter:blur(10px)}
+.nav button{background:none;border:0;color:#a9959b;font-size:11px;cursor:pointer}
+.nav button.active{color:#fff}
+.toast{position:fixed;z-index:20;bottom:85px;left:50%;transform:translate(-50%,20px);opacity:0;background:#24151c;border:1px solid #70505d;border-radius:13px;padding:12px;width:min(420px,90%);text-align:center;transition:.2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.hidden{display:none!important}
+@media(max-width:390px){.grid{grid-template-columns:1fr}.hero h1{font-size:45px}}
+</style>
+</head>
+
+<body>
+<main class="app">
+
+<header class="top">
+<b class="logo">ENTRE NOUS</b>
+<button class="btn ghost" style="width:auto" onclick="go('profile')">Mon profil</button>
+</header>
+
+<section id="home" class="screen active">
+<div class="hero">
+<div class="eyebrow">Des jeux pour créer du lien.</div>
+<h1>ENTRE<br>NOUS</h1>
+<h2>ON JOUE POUR SE DÉCOUVRIR.<br>ON ÉCHANGE POUR SE RAPPROCHER.</h2>
+<p class="p">À deux, entre amis ou à distance. Une question devient une discussion, puis parfois un souvenir.</p>
+<button class="btn" onclick="go('play')">Commencer l'expérience</button>
+</div>
+<div class="panel">
+<b>Ton espace</b>
+<p class="small" id="homeProfile">Enregistre ton prénom ou pseudo pour retrouver ton expérience.</p>
+</div>
+</section>
+
+<section id="play" class="screen">
+<div class="hero">
+<div class="eyebrow">Jouer</div>
+<h1>À toi de jouer.</h1>
+<p class="p">Retrouve les jeux ENTRE NOUS déjà créés.</p>
+</div>
+<div class="grid" id="gameCards"></div>
+<div class="panel">
+<b>🌍 À distance</b>
+<p class="small">Crée une partie partagée et invite l'autre personne avec un lien ou un code.</p>
+<button class="btn" onclick="go('distance')">Créer / rejoindre</button>
+</div>
+</section>
+
+<section id="experience" class="screen">
+<div class="hero">
+<div class="eyebrow">Expérience</div>
+<h1>Choisis ton univers.</h1>
+<p class="p">Les expériences générales sont accessibles ici. Les packs spécialisés proposent 4 questions gratuites avant le déblocage.</p>
+</div>
+<div class="grid" id="experienceCards"></div>
+</section>
+
+<section id="game" class="screen">
+<button class="back btn ghost" onclick="quit()">← Quitter / enregistrer</button>
+
+<div class="panel">
+<span class="badge" id="round"></span>
+<span class="badge" id="meta"></span>
+</div>
+
+<div class="progress">
+<i id="bar"></i>
+</div>
+
+<div class="question" id="question"></div>
+
+<textarea id="answer" class="textarea" placeholder="Ta réponse…"></textarea>
+
+<div class="actions">
+<button class="btn ghost" onclick="skip()">Je passe</button>
+<button class="btn ghost" onclick="discuss()">On en rediscute</button>
+</div>
+
+<button class="btn" style="margin-top:9px" onclick="saveAnswer()">Enregistrer ma réponse</button>
+</section>
+
+<section id="finish" class="screen">
+<div class="hero">
+<div class="eyebrow">Expérience terminée</div>
+<h1>Ce moment reste entre nous.</h1>
+<p class="p">Tu peux garder un souvenir et préparer un récapitulatif à partager.</p>
+
+<textarea id="note" class="textarea" placeholder="Une note, un souvenir, une phrase à garder…"></textarea>
+
+<button class="btn" onclick="saveMemory()">Garder ce souvenir</button>
+
+<button class="btn ghost" style="margin-top:9px" onclick="shareRecap()">Partager le récapitulatif</button>
+</div>
+</section>
+
+<section id="sessions" class="screen">
+<div class="hero">
+<div class="eyebrow">Mes parties</div>
+<h1>Reprendre.</h1>
+<div id="sessionList"></div>
+</div>
+</section>
+
+<section id="distance" class="screen">
+<button class="back btn ghost" onclick="go('profile')">← Profil</button>
+
+<div class="hero">
+<div class="eyebrow">À distance</div>
+<h1>Partager une partie.</h1>
+
+<div class="panel">
+<b>Créer une invitation</b>
+
+<input id="inviteName" class="input" placeholder="Prénom / pseudo de la personne invitée">
+
+<select id="inviteExp">
+<option>Se découvrir</option>
+<option>Complicité</option>
+<option>Amitié</option>
+<option>Amour</option>
+<option>À distance</option>
+<option>Piment</option>
+</select>
+
+<button class="btn" onclick="createInvite()">Créer l'invitation ❤️</button>
+
+<div id="inviteOut"></div>
+</div>
+
+<div class="panel">
+<b>Rejoindre</b>
+
+<input id="joinCode" class="input" placeholder="Code d'invitation">
+
+<button class="btn ghost" onclick="joinInvite()">Rejoindre la partie</button>
+</div>
+
+</div>
+</section>
+
+<section id="profile" class="screen">
+<div class="hero">
+<div class="eyebrow">Profil</div>
+<h1>Mon espace.</h1>
+
+<div class="panel">
+<b>👤 Mes informations</b>
+
+<input id="profileName" class="input" placeholder="Nom / pseudo">
+
+<input id="profileEmail" class="input" type="email" placeholder="Adresse e-mail">
+
+<label class="small">
+<input id="profilePaid" type="checkbox">
+Paiement effectué
+</label>
+
+<button class="btn" style="margin-top:12px" onclick="saveProfile()">Enregistrer</button>
+</div>
+
+<div class="panel">
+<b>👥 Mes partenaires</b>
+<div id="partners"></div>
+</div>
+
+<div class="panel">
+<b>📸 Mes souvenirs</b>
+<div id="memories"></div>
+</div>
+
+<div class="panel">
+<b>☁️ Synchronisation</b>
+<p class="small" id="sbStatus">Supabase sera activé dès que la Publishable key est configurée.</p>
+<button class="btn ghost" onclick="testSupabase()">Tester la connexion</button>
+</div>
+
+</div>
+</section>
+
+<section id="paywall" class="screen">
+<div class="hero">
+<div class="eyebrow">Accès complet</div>
+<h1>Débloquer.</h1>
+
+<p class="p">Les 4 premières questions sont gratuites. La suite est réservée à l'accès Premium.</p>
+
+<div class="panel">
+<div style="font:38px Georgia,serif">4,99 €</div>
+<p class="small">4 semaines</p>
+<button class="btn" onclick="toast('Paiement à connecter avec Stripe')">Choisir cet accès</button>
+</div>
+
+</div>
+</section>
+
+<nav class="nav">
+<button data-n="home" onclick="go('home')">⌂<br>Accueil</button>
+<button data-n="play" onclick="go('play')">♡<br>Jouer</button>
+<button data-n="experience" onclick="go('experience')">✦<br>Expérience</button>
+<button data-n="profile" onclick="go('profile')">●<br>Profil</button>
+</nav>
+
+<div id="toast" class="toast"></div>
+
+</main>
+
 <script>
-// ===== SUPABASE : configuration ENTRE NOUS =====
-// La clé Publishable est faite pour être utilisée dans le navigateur.
-// NE JAMAIS mettre ici une clé "secret".
-const SUPABASE_URL='https://gnxtuxzqpuynqgdmcaie.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY='sb_publishable_a90oxd8BGJ4_zN5lb2hEOQ_KXCbSPGu';
-let supabaseClient=null;
 
-if(window.supabase && SUPABASE_PUBLISHABLE_KEY !== 'COLLER_ICI_LA_CLE_PUBLISHABLE'){
-  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const SUPABASE_URL="https://gnxtuxzqpuynqgdmcaie.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_a90oxd8BGJ4_zN5lb2hEOQ_KXCbSPGu";
+
+let sb=null;
+
+let EN_USER=null;
+let EN_PARTICIPANT=null;
+let EN_GAME=null;
+
+if(window.supabase)
+try{
+sb=window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_PUBLISHABLE_KEY
+)
+}catch(e){}
+
+async function ensureConnection(){
+
+if(!sb)
+throw new Error("Supabase indisponible");
+
+const {data:{session}}=
+await sb.auth.getSession();
+
+if(session?.user){
+EN_USER=session.user;
+return session.user;
 }
-  async function ensureAnonymousSession(){
-  if(!supabaseClient) return false;
 
-  const {data:{session}} = await supabaseClient.auth.getSession();
+const {data,error}=
+await sb.auth.signInAnonymously();
 
-  if(session) return true;
+if(error) throw error;
 
-  const {error} = await supabaseClient.auth.signInAnonymously();
+EN_USER=data.user;
 
-  if(error){
-    console.error('Connexion anonyme Supabase:', error);
-    return false;
-  }
-
-  return true;
+return EN_USER;
 }
 
-ensureAnonymousSession();
+async function syncProfile(){
+
+const u=await ensureConnection();
+
+const name=(S.profile?.name||"").trim();
+
+if(!name) return;
+
+const {error}=
+await sb.from("profiles").upsert(
+{
+id:u.id,
+name
+},
+{
+onConflict:"id"
+}
+);
+
+if(error) throw error;
+}
+
+async function ensureGame(experience){
+
+const u=await ensureConnection();
+
+if(
+EN_GAME?.id &&
+EN_GAME.experience===experience
+)
+return EN_GAME;
+
+const code=
+Math.random()
+.toString(36)
+.slice(2,8)
+.toUpperCase();
+
+const {data,error}=
+await sb
+.from("games")
+.insert({
+owner_id:u.id,
+experience,
+status:"active",
+invite_code:code
+})
+.select()
+.single();
+
+if(error) throw error;
+
+EN_GAME=data;
+
+const {data:p,error:pe}=
+await sb
+.from("participants")
+.insert({
+game_id:data.id,
+user_id:u.id,
+name:S.profile?.name||"Participant",
+role:"owner"
+})
+.select()
+.single();
+
+if(pe) throw pe;
+
+EN_PARTICIPANT=p;
+
+return data;
+}
+
+async function saveAnswerRemote(
+questionIndex,
+questionText,
+answer,
+discussed=false
+){
+
+if(!EN_GAME||!EN_PARTICIPANT)
+return;
+
+const row={
+game_id:EN_GAME.id,
+participant_id:EN_PARTICIPANT.id,
+question_index:questionIndex,
+question:questionText,
+answer:answer||null,
+discussed
+};
+
+const {data:existing}=
+await sb
+.from("answers")
+.select("id")
+.eq("game_id",EN_GAME.id)
+.eq("participant_id",EN_PARTICIPANT.id)
+.eq("question_index",questionIndex)
+.maybeSingle();
+
+const {error}=existing
+?
+await sb
+.from("answers")
+.update(row)
+.eq("id",existing.id)
+:
+await sb
+.from("answers")
+.insert(row);
+
+if(error) throw error;
+}
 
 async function testSupabase(){
-  const el=document.getElementById('supabaseStatus');
-  if(!supabaseClient){
-    el.textContent='⚠️ La clé Publishable doit encore être ajoutée dans le fichier.';
-    return;
-  }
-  try{
-    const {error}=await supabaseClient.auth.getSession();
-    if(error) throw error;
-    el.textContent='✅ Supabase est bien connecté.';
-    toast('Connexion Supabase réussie ❤️');
-  }catch(e){
-    console.error(e);
-    el.textContent='❌ Connexion impossible : vérifie l’URL et la clé Publishable.';
-    toast('Connexion Supabase impossible');
-  }
+
+try{
+
+await ensureConnection();
+
+sbStatus.textContent=
+"✅ ENTRE NOUS est connecté à Supabase.";
+
+toast("Connexion Supabase réussie ❤️");
+
+}catch(e){
+
+console.error(e);
+
+sbStatus.textContent=
+"❌ Connexion impossible.";
+
+toast("Connexion Supabase impossible");
+
 }
 
-const Q={"Se découvrir":["Quelle est une chose que peu de personnes savent de toi ?","Qu'est-ce qui te met instantanément de bonne humeur ?","Quel souvenir te fait encore sourire ?","Qu'aimerais-tu que les autres comprennent mieux chez toi ?"],"Complicité":["Quelle est une petite chose que tu apprécies particulièrement entre nous ?","Quel moment récent t'a fait te sentir proche de moi ?","Quelle activité aimerais-tu partager davantage ?","Quelle question aimerais-tu que je te pose plus souvent ?"],"Amitié":["Quel souvenir avec un ami te fait le plus rire ?","Qu'est-ce qui fait une vraie amitié pour toi ?","Quel défi amusant pourrais-tu proposer à notre groupe ?","Quelle qualité apprécies-tu le plus chez tes proches ?"],"Amour":["Qu'est-ce qui te fait te sentir aimé(e) ?","Quel moment aimerais-tu revivre ?","Qu'aimerais-tu construire dans les prochains mois ?","Qu'aimerais-tu pouvoir dire plus facilement ?"],"À distance":["Qu'est-ce qui te manque le plus quand on est loin ?","Quel petit rituel pourrait nous rapprocher à distance ?","Quelle surprise aimerais-tu recevoir un jour où je te manque ?","Qu'est-ce que tu veux retrouver quand nous serons réunis ?"],"Souvenirs":["Quel moment mériterait une photo dans notre album ?","Quelle phrase aimerais-tu garder de cette journée ?","Quel souvenir voudrais-tu raconter dans dix ans ?","Qu'est-ce que tu veux absolument ne pas oublier ?"],"Piment":["Quelle envie ou curiosité aimerais-tu pouvoir exprimer plus librement ?","Qu'est-ce qui crée pour toi une vraie tension positive ?","Quelle limite est importante pour toi ?","Quel moment audacieux aimerais-tu imaginer ?"],"Couple":["Qu'est-ce que tu veux protéger dans notre relation ?","Quel projet aimerais-tu construire ensemble ?","Qu'est-ce qui nous rend uniques ?","De quoi as-tu besoin pour te sentir compris(e) ?"],"Sexfriend":["Qu'est-ce qui est essentiel pour que cette dynamique reste confortable ?","Quelles attentes devraient être dites clairement ?","Quelle limite doit toujours être respectée ?","Qu'aimerais-tu pouvoir proposer sans gêne ?"],"Libertin":["Quelles règles rendent l'expérience sereine pour toi ?","Qu'est-ce qui doit rester entre nous ?","Comment parler des limites avant une expérience ?","Qu'est-ce qui te donne confiance ?"],"10 ans ou plus":["Qu'est-ce que tu admires encore chez moi après toutes ces années ?","Quel souvenir de notre histoire voudrais-tu garder ?","Qu'avons-nous appris ensemble ?","Qu'aimerais-tu réinventer aujourd'hui ?"]};
-let S=JSON.parse(localStorage.getItem('EN34')||'{"sessions":[],"profile":{},"memories":[]}'),cur=null,hist=[];const save=()=>localStorage.setItem('EN34',JSON.stringify(S));function toast(t){let x=document.getElementById('toast');x.textContent=t;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),1700)}function go(id,p=true){let a=document.querySelector('.active');if(a&&a.id!==id&&p)hist.push(a.id);document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.n===id));if(id==='sessions')renderSessions();window.scrollTo(0,0)}function back(){go(hist.pop()||'home',false)}function start(name){cur={name,qs:Q[name]||Q['Se découvrir'],i:0,a:[]};S.sessions.unshift({name,status:'En cours',i:0,a:[]});S.sessions=S.sessions.slice(0,20);save();go('game');render()}function render(){let q=cur.qs[cur.i];round.textContent=cur.name;question.textContent=q;answer.value=cur.a[cur.i]||'';bar.style.width=(cur.i/cur.qs.length*100)+'%';meta.textContent='Carte '+(cur.i+1)+' sur '+cur.qs.length}function next(){cur.i++;if(cur.i>=cur.qs.length)return finish();S.sessions[0].i=cur.i;S.sessions[0].a=cur.a;save();render()}function saveAnswer(){cur.a[cur.i]=answer.value.trim();next()}function skip(){cur.a[cur.i]='';next()}function discuss(){cur.a[cur.i]=answer.value.trim();toast('Carte ajoutée à “On en rediscute”');next()}function finish(){if(S.sessions[0]){S.sessions[0].status='Terminée';S.sessions[0].i=cur.qs.length}save();go('finish',false)}function quit(){if(S.sessions[0]){S.sessions[0].i=cur.i;S.sessions[0].a=cur.a;save()}go('sessions',false)}function saveMemory(){S.memories.push({date:new Date().toLocaleDateString('fr-FR'),note:note.value,experience:cur?.name||'ENTRE NOUS'});save();toast('Souvenir enregistré ❤️');go('rewards',false)}function renderSessions(){sessionList.innerHTML=S.sessions.length?S.sessions.map((s,i)=>'<div class="panel"><span class="badge">'+s.status+'</span><h3>'+s.name+'</h3><p class="small">Progression : '+Math.min(s.i||0,4)+' / 4 cartes</p><div class="actions"><button class="btn" onclick="resume('+i+')">Reprendre</button><button class="btn ghost" onclick="del('+i+')">Supprimer</button></div></div>').join(''):'<div class="empty">Aucune partie pour le moment.</div>'}function resume(i){let s=S.sessions[i];cur={name:s.name,qs:Q[s.name]||Q['Se découvrir'],i:s.i||0,a:s.a||[]};go('game');render()}function del(i){S.sessions.splice(i,1);save();renderSessions();toast('Partie supprimée')}function invite(){let n=inviteName.value.trim()||'Invité(e)',e=inviteExp.value,c=Math.random().toString(36).slice(2,8).toUpperCase();S.sessions.unshift({name:e+' · '+n,status:'Invitation créée',i:0,a:[],code:c});save();renderSessions();toast('Invitation créée : '+c)}function remoteCreate(){let c=Math.random().toString(36).slice(2,8).toUpperCase();remoteOut.innerHTML='<div class="panel"><div class="tag">Code</div><div class="remote">'+c+'</div><p class="small">À partager. Synchronisation serveur à brancher.</p><button class="btn" onclick="navigator.clipboard?.writeText(\''+c+'\');toast(\'Code copié\')">Copier</button></div>'}function remoteJoin(){if(!join.value.trim())return toast('Entre un code');toast('Code accepté');start('À distance')}function pick(p){toast('Offre sélectionnée : '+p+' — Stripe sera connecté ici.')}function profileSave(){S.profile.name=profile.value.trim();save();toast('Profil enregistré')}
-
-// Vérification silencieuse au chargement : aucun accès aux tables n'est effectué ici.
-if(supabaseClient){
-  testSupabase();
 }
+
+const Q={
+
+"Se découvrir":[
+
+"Quelle est une chose que peu de personnes savent de toi ?",
+
+"Qu'est-ce qui te met instantanément de bonne humeur ?",
+
+"Quel souvenir te fait encore sourire ?",
+
+"Qu'aimerais-tu que les autres comprennent mieux chez toi ?",
+
+"Quelle qualité apprécies-tu le plus chez une personne proche ?",
+
+"Qu'est-ce qui te fait te sentir vraiment écouté(e) ?",
+
+"Quel rêve aimerais-tu prendre davantage au sérieux ?",
+
+"Quelle petite habitude dit beaucoup de choses sur toi ?",
+
+"Qu'aimerais-tu oser davantage cette année ?",
+
+"Qu'aimerais-tu que l'on retienne de toi ?"
+
+],
+
+"Complicité":[
+
+"Quelle petite chose apprécies-tu particulièrement entre nous ?",
+
+"Quel moment récent t'a fait te sentir proche de moi ?",
+
+"Quelle activité aimerais-tu partager davantage ?",
+
+"Quelle question aimerais-tu que je te pose plus souvent ?",
+
+"Quel fou rire entre nous voudrais-tu revivre ?",
+
+"Qu'est-ce qui rend notre lien particulier ?"
+
+],
+
+"Amitié":[
+
+"Quel souvenir avec un ami te fait le plus rire ?",
+
+"Qu'est-ce qui fait une vraie amitié pour toi ?",
+
+"Quel défi amusant pourrais-tu proposer à notre groupe ?",
+
+"Quelle qualité apprécies-tu le plus chez tes proches ?",
+
+"Quel moment aimerais-tu créer avec tes amis ?",
+
+"Qu'est-ce qui te fait te sentir entouré(e) ?"
+
+],
+
+"Amour":[
+
+"Qu'est-ce qui te fait te sentir aimé(e) ?",
+
+"Quel moment aimerais-tu revivre ?",
+
+"Qu'aimerais-tu construire dans les prochains mois ?",
+
+"Qu'aimerais-tu pouvoir dire plus facilement ?",
+
+"Quelle attention te touche le plus ?",
+
+"Qu'est-ce que tu veux protéger dans notre relation ?"
+
+],
+
+"À distance":[
+
+"Qu'est-ce qui te manque le plus quand on est loin ?",
+
+"Quel petit rituel pourrait nous rapprocher à distance ?",
+
+"Quelle surprise aimerais-tu recevoir un jour où je te manque ?",
+
+"Qu'est-ce que tu veux retrouver quand nous serons réunis ?",
+
+"Comment garder notre complicité malgré la distance ?",
+
+"Quel souvenir aimerais-tu créer à distance ?"
+
+],
+
+"Piment":[
+
+"Quelle envie ou curiosité aimerais-tu pouvoir exprimer plus librement ?",
+
+"Qu'est-ce qui crée pour toi une vraie tension positive ?",
+
+"Quelle limite est importante pour toi ?",
+
+"Quel moment audacieux aimerais-tu imaginer ?",
+
+"Qu'est-ce qui te met en confiance pour parler de désir ?",
+
+"Quelle règle rendrait une expérience plus sereine ?"
+
+],
+
+"Couple":[
+
+"Qu'est-ce que tu veux protéger dans notre couple ?",
+
+"Quel projet aimerais-tu construire ensemble ?",
+
+"Qu'est-ce qui nous rend uniques ?",
+
+"De quoi as-tu besoin pour te sentir compris(e) ?",
+
+"Comment aimerais-tu faire évoluer notre relation ?",
+
+"Quelle habitude de couple aimerais-tu créer ?"
+
+],
+
+"Sexfriend":[
+
+"Qu'est-ce qui est essentiel pour que cette dynamique reste confortable ?",
+
+"Quelles attentes devraient être dites clairement ?",
+
+"Quelle limite doit toujours être respectée ?",
+
+"Qu'aimerais-tu pouvoir proposer sans gêne ?"
+
+],
+
+"Libertin":[
+
+"Quelles règles rendent l'expérience sereine pour toi ?",
+
+"Qu'est-ce qui doit rester entre nous ?",
+
+"Comment parler des limites avant une expérience ?",
+
+"Qu'est-ce qui te donne confiance ?"
+
+],
+
+"10 ans ou plus":[
+
+"Qu'est-ce que tu admires encore chez moi après toutes ces années ?",
+
+"Quel souvenir de notre histoire voudrais-tu garder ?",
+
+"Qu'avons-nous appris ensemble ?",
+
+"Qu'aimerais-tu réinventer aujourd'hui ?"
+
+]
+
+};
+
+const GAMES=[
+
+["🎲","Qui me connaît ?","Devinez les réponses de l'autre."],
+
+["🎯","Le dé ENTRE NOUS","Un tirage pour lancer la discussion."],
+
+["🥂","Apéro","Questions, votes et défis pour la soirée."],
+
+["🔥","Piment","Oser parler des envies et des limites."],
+
+["🤪","Dinguerie","Les questions qui font rire et sortir du cadre."],
+
+["📸","Souvenirs","Créer et conserver vos moments."],
+
+["✨","Notre prochain projet","Une idée chacun, un projet ensemble."]
+
+];
+
+const EXP=[
+
+["🌿","Se découvrir","10 questions gratuites + comparaison des réponses."],
+
+["💞","Complicité","Pour nourrir ce lien et vos petits moments."],
+
+["👥","Amitié","Pour les liens d'amitié et les groupes."],
+
+["❤️","Amour","Pour parler vrai et se rapprocher."],
+
+["🔥","Piment","Envies, limites, confiance."],
+
+["💑","Couple","Pack spécialisé · 4 questions gratuites."],
+
+["💋","Sexfriend","Pack spécialisé · 4 questions gratuites."],
+
+["🌶️","Libertin","Pack spécialisé · 4 questions gratuites."],
+
+["⌛","10 ans ou plus","Pack spécialisé · 4 questions gratuites."]
+
+];
+
+let S=JSON.parse(
+localStorage.getItem("EN_MASTER")||
+'{"profile":{},"sessions":[],"memories":[],"partners":[],"premium":false}'
+);
+
+let cur=null;
+let hist=[];
+
+function toast(t){
+
+const x=document.getElementById("toast");
+
+x.textContent=t;
+
+x.classList.add("show");
+
+setTimeout(
+()=>x.classList.remove("show"),
+1800
+);
+
+}
+
+function save(){
+
+localStorage.setItem(
+"EN_MASTER",
+JSON.stringify(S)
+);
+
+}
+
+function go(id,p=true){
+
+const a=document.querySelector(".screen.active");
+
+if(
+a &&
+a.id!==id &&
+p
+)
+hist.push(a.id);
+
+document
+.querySelectorAll(".screen")
+.forEach(x=>x.classList.remove("active"));
+
+document
+.getElementById(id)
+.classList.add("active");
+
+document
+.querySelectorAll(".nav button")
+.forEach(x=>
+x.classList.toggle(
+"active",
+x.dataset.n===id
+)
+);
+
+if(id==="sessions")
+renderSessions();
+
+if(id==="profile")
+renderProfile();
+
+window.scrollTo(0,0);
+
+}
+
+function back(){
+
+go(
+hist.pop()||"home",
+false
+);
+
+}
+
+function renderCards(){
+
+gameCards.innerHTML=
+GAMES.map(
+(g,i)=>
+`<div class="card" onclick="startGame('${esc(g[1])}')">
+<div style="font-size:28px">${g[0]}</div>
+<h3>${g[1]}</h3>
+<p>${g[2]}</p>
+</div>`
+).join("");
+
+experienceCards.innerHTML=
+EXP.map(
+(e,i)=>
+`<div class="card" onclick="openExperience('${esc(e[1])}')">
+<div style="font-size:28px">${e[0]}</div>
+<h3>${e[1]}</h3>
+<p>${e[2]}</p>
+</div>`
+).join("");
+
+}
+
+function esc(s){
+
+return s.replace(
+/'/g,
+"\\\\'"
+);
+
+}
+
+function openExperience(name){
+
+if(Q[name]){
+startGame(name);
+return;
+}
+
+go("paywall");
+
+}
+
+async function startGame(name){
+
+let qs=
+Q[name]||
+Q["Se découvrir"];
+
+cur={
+name,
+qs,
+i:0,
+a:[]
+};
+
+S.sessions.unshift({
+name,
+status:"En cours",
+i:0,
+a:[],
+created:new Date().toISOString()
+});
+
+S.sessions=
+S.sessions.slice(0,30);
+
+save();
+
+go("game");
+
+renderQuestion();
+
+try{
+
+await ensureGame(name);
+
+await syncProfile();
+
+}catch(e){
+
+console.error(e);
+
+toast(
+"Mode local : synchronisation à vérifier"
+);
+
+}
+
+}
+
+function renderQuestion(){
+
+const q=cur.qs[cur.i];
+
+round.textContent=cur.name;
+
+meta.textContent=
+`Carte ${cur.i+1} sur ${cur.qs.length}`;
+
+question.textContent=q;
+
+answer.value=
+cur.a[cur.i]||"";
+
+bar.style.width=
+(cur.i/cur.qs.length*100)+"%";
+
+}
+
+function next(){
+
+cur.i++;
+
+if(cur.i>=cur.qs.length){
+
+finish();
+
+return;
+
+}
+
+S.sessions[0].i=cur.i;
+
+S.sessions[0].a=cur.a;
+
+save();
+
+renderQuestion();
+
+}
+
+async function saveAnswer(){
+
+cur.a[cur.i]=
+answer.value.trim();
+
+try{
+
+await saveAnswerRemote(
+cur.i,
+cur.qs[cur.i],
+cur.a[cur.i],
+false
+);
+
+}catch(e){
+
+console.error(e);
+
+}
+
+next();
+
+}
+
+async function skip(){
+
+cur.a[cur.i]="";
+
+try{
+
+await saveAnswerRemote(
+cur.i,
+cur.qs[cur.i],
+null,
+false
+);
+
+}catch(e){
+
+console.error(e);
+
+}
+
+S.sessions[0].skipped=
+(S.sessions[0].skipped||[])
+.concat(cur.i);
+
+next();
+
+}
+
+async function discuss(){
+
+cur.a[cur.i]=
+answer.value.trim();
+
+try{
+
+await saveAnswerRemote(
+cur.i,
+cur.qs[cur.i],
+cur.a[cur.i],
+true
+);
+
+}catch(e){
+
+console.error(e);
+
+}
+
+S.sessions[0].discuss=
+(S.sessions[0].discuss||[])
+.concat(cur.i);
+
+toast(
+"Ajoutée à « On en rediscute »"
+);
+
+next();
+
+}
+
+function finish(){
+
+if(S.sessions[0]){
+
+S.sessions[0].status=
+"Terminée";
+
+S.sessions[0].i=
+cur.qs.length;
+
+S.sessions[0].a=
+cur.a;
+
+}
+
+save();
+
+go("finish",false);
+
+}
+
+function quit(){
+
+if(cur&&S.sessions[0]){
+
+S.sessions[0].i=
+cur.i;
+
+S.sessions[0].a=
+cur.a;
+
+save();
+
+}
+
+go("sessions",false);
+
+}
+
+function renderSessions(){
+
+sessionList.innerHTML=
+S.sessions.length
+?
+S.sessions.map(
+(s,i)=>
+`<div class="panel">
+<span class="badge">${s.status}</span>
+<h3>${s.name}</h3>
+<p class="small">
+Progression :
+${Math.min(
+s.i||0,
+(Q[s.name]||[]).length
+)}
+/
+${(Q[s.name]||[]).length||"—"}
+cartes
+</p>
+
+<div class="actions">
+
+<button class="btn"
+onclick="resume(${i})">
+Reprendre
+</button>
+
+<button class="btn ghost"
+onclick="delSession(${i})">
+Supprimer
+</button>
+
+</div>
+</div>`
+).join("")
+:
+`<div class="empty">
+Aucune partie pour le moment.
+</div>`;
+
+}
+
+function resume(i){
+
+const s=S.sessions[i];
+
+cur={
+name:s.name,
+qs:Q[s.name]||Q["Se découvrir"],
+i:s.i||0,
+a:s.a||[]
+};
+
+go("game");
+
+renderQuestion();
+
+}
+
+function delSession(i){
+
+S.sessions.splice(i,1);
+
+save();
+
+renderSessions();
+
+}
+
+function saveMemory(){
+
+const n=
+note.value.trim();
+
+if(!n)
+return toast(
+"Écris un souvenir avant de l'enregistrer."
+);
+
+S.memories.unshift({
+
+date:new Date()
+.toLocaleDateString("fr-FR"),
+
+note:n,
+
+experience:
+cur?.name||"ENTRE NOUS"
+
+});
+
+save();
+
+toast(
+"Souvenir enregistré ❤️"
+);
+
+go("profile");
+
+}
+
+function renderProfile(){
+
+profileName.value=
+S.profile.name||"";
+
+profileEmail.value=
+S.profile.email||"";
+
+profilePaid.checked=
+!!S.profile.paid;
+
+homeProfile.textContent=
+S.profile.name
+?
+`Bienvenue ${S.profile.name} ❤️`
+:
+"Enregistre ton prénom ou pseudo pour retrouver ton expérience.";
+
+partners.innerHTML=
+S.partners.length
+?
+S.partners.map(
+p=>
+`<div class="panel">
+<b>${p.name}</b>
+<p class="small">
+${p.experience||"Invitation"}
+</p>
+</div>`
+).join("")
+:
+"<p class='small'>Aucun partenaire enregistré pour le moment.</p>";
+
+memories.innerHTML=
+S.memories.length
+?
+S.memories.map(
+m=>
+`<div class="panel">
+<span class="badge">${m.date}</span>
+<b>${m.experience}</b>
+<p class="small">${m.note}</p>
+</div>`
+).join("")
+:
+"<p class='small'>Aucun souvenir pour le moment.</p>";
+
+}
+
+async function saveProfile(){
+
+S.profile={
+name:profileName.value.trim(),
+email:profileEmail.value.trim(),
+paid:profilePaid.checked
+};
+
+save();
+
+try{
+
+await ensureConnection();
+
+await syncProfile();
+
+}catch(e){
+
+console.error(e);
+
+}
+
+renderProfile();
+
+toast(
+"Profil enregistré ❤️"
+);
+
+}
+
+function createInvite(){
+
+const name=
+inviteName.value.trim()||
+"Invité(e)";
+
+const exp=
+inviteExp.value;
+
+const code=
+Math.random()
+.toString(36)
+.slice(2,8)
+.toUpperCase();
+
+const url=
+location.origin+
+location.pathname+
+"?invite="+
+code;
+
+S.partners.unshift({
+name,
+experience:exp,
+code
+});
+
+save();
+
+inviteOut.innerHTML=
+`<div class="panel">
+<span class="badge">Code</span>
+
+<div class="remote">${code}</div>
+
+<p class="small"
+style="word-break:break-all">
+${url}
+</p>
+
+<div class="actions">
+
+<button class="btn"
+onclick="shareInvite('${code}','wa')">
+WhatsApp
+</button>
+
+<button class="btn ghost"
+onclick="shareInvite('${code}','copy')">
+Copier
+</button>
+
+</div>
+</div>`;
+
+toast(
+"Invitation créée ❤️"
+);
+
+}
+
 function shareInvite(code,method){
-const link=location.origin+location.pathname+'?invite='+code;
-const text='Rejoins-moi sur ENTRE NOUS 💗\n'+link;
-if(method==='whatsapp'){
-location.href='https://wa.me/?text='+encodeURIComponent(text);
-return;
-}
-if(method==='email'){
-location.href='mailto:?subject='+encodeURIComponent('Invitation ENTRE NOUS 💗')+'&body='+encodeURIComponent(text);
-return;
-}
-if(navigator.clipboard){
-navigator.clipboard.writeText(link);
-toast('Lien copié ❤️');
+
+const url=
+location.origin+
+location.pathname+
+"?invite="+
+code;
+
+const text=
+"Rejoins-moi sur ENTRE NOUS ❤️\n"+
+url;
+
+if(method==="wa"){
+
+location.href=
+"https://wa.me/?text="+
+encodeURIComponent(text);
+
 }else{
-toast('Lien : '+link);
-}
+
+navigator.clipboard?.writeText(url);
+
+toast("Lien copié ❤️");
+
 }
 
-const renderSessionsOriginal=renderSessions;
-renderSessions=function(){
-sessionList.innerHTML=S.sessions.length?S.sessions.map((s,i)=>{
-let share=s.code?
-'<div class="panel" style="margin-top:10px">'+
-'<div class="tag">Lien d’invitation</div>'+
-'<input class="input" value="'+location.origin+location.pathname+'?invite='+s.code+'" readonly>'+
-'<div class="actions">'+
-'<button class="btn" onclick="shareInvite(\''+s.code+'\',\'whatsapp\')">WhatsApp</button>'+
-'<button class="btn ghost" onclick="shareInvite(\''+s.code+'\',\'email\')">E-mail</button>'+
-'</div>'+
-'<button class="btn ghost" style="margin-top:8px" onclick="shareInvite(\''+s.code+'\',\'copy\')">Copier le lien</button>'+
-'</div>':'';
-return '<div class="panel"><span class="badge">'+s.status+'</span><h3>'+s.name+'</h3><p class="small">Progression : '+Math.min(s.i||0,4)+' / 4 cartes</p><div class="actions"><button class="btn" onclick="resume('+i+')">Reprendre</button><button class="btn ghost" onclick="del('+i+')">Supprimer</button></div>'+share+'</div>';
-}).join(''):'<div class="empty">Aucune partie pour le moment.</div>';
 }
-</script></body></html>
+
+function joinInvite(){
+
+const c=
+joinCode.value
+.trim()
+.toUpperCase();
+
+if(!c)
+return toast(
+"Entre un code."
+);
+
+const p=
+S.partners.find(
+x=>x.code===c
+);
+
+if(p){
+
+toast(
+"Invitation retrouvée ❤️"
+);
+
+startGame(
+p.experience
+);
+
+}else{
+
+toast(
+"Code introuvable sur cet appareil. La liaison serveur sera utilisée quand Supabase sera activé."
+);
+
+}
+
+}
+
+function shareRecap(){
+
+const text=
+`Mon expérience ENTRE NOUS : ${cur?.name||"ENTRE NOUS"} ❤️`;
+
+if(navigator.share)
+
+navigator.share({
+title:"ENTRE NOUS",
+text
+});
+
+else{
+
+navigator.clipboard?.writeText(text);
+
+toast(
+"Récapitulatif copié"
+);
+
+}
+
+}
+
+renderCards();
+
+renderProfile();
+
+const invite=
+new URLSearchParams(
+location.search
+).get("invite");
+
+if(invite){
+
+go("distance");
+
+joinCode.value=invite;
+
+}
+
+</script>
+
+</body>
+</html>
