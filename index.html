@@ -204,7 +204,7 @@ async function trackEvent(eventName,metadata={},productKey=null,amount=null){try
 function isCreatorAdmin(){return !!EN_USER?.email&&EN_USER.email.toLowerCase()==="alcindor.anny@gmail.com"}
 async function loadCommercialMetrics(){if(!isCreatorAdmin())return;const box=document.getElementById("commercialMetrics");if(!box)return;box.innerHTML="<p class='small'>Chargement…</p>";try{const {data,error}=await sb.rpc("get_commercial_metrics",{days_back:30});if(error)throw error;const m=data||{};const cards=[["👀","Visiteurs",m.visitors||0],["🎮","Joueurs",m.players||0],["👤","Comptes",m.accounts||0],["💎","Clics Premium",m.premium_clicks||0],["🔥","Clics packs",m.pack_clicks||0],["💳","Paiements détectés",m.payments_detected||0],["💶","CA indicatif",(Number(m.indicative_revenue||0)).toFixed(2)+" €"],["🔄","Sessions récurrentes",m.returning_sessions||0]];box.innerHTML=cards.map(x=>`<div class="card" style="cursor:default"><div style="font-size:22px">${x[0]}</div><b>${x[2]}</b><p class="small">${x[1]}</p></div>`).join("")}catch(e){console.error(e);box.innerHTML="<p class='small'>Statistiques indisponibles pour le moment.</p>"}}
 function renderCommercialAdmin(){const panel=document.getElementById("commercialAdminPanel");if(!panel)return;panel.classList.toggle("hidden",!isCreatorAdmin());if(isCreatorAdmin())loadCommercialMetrics()}
-const EN_PUBLIC_BASE_URL="https://entre-nouscorrection.vercel.app/"; const AUTH_REDIRECT=()=>EN_PUBLIC_BASE_URL+"?auth=confirm"; const EN_APP_URL=()=>location.origin+location.pathname;
+const EN_PUBLIC_BASE_URL=()=>location.origin+location.pathname; const AUTH_REDIRECT=()=>EN_PUBLIC_BASE_URL()+"?auth=confirm"; const INVITE_AUTH_REDIRECT=(token)=>EN_PUBLIC_BASE_URL()+"?auth=invite&invite="+encodeURIComponent(token);
 function isAnonymousUser(u=EN_USER){return !!u?.is_anonymous}
 function passwordOk(p){return typeof p==="string"&&p.length>=8}
 function setAccountMessage(text,ok=false){const el=document.getElementById("accountStatus");if(el){el.textContent=text;el.style.color=ok?"#8fd8a8":""}}
@@ -329,6 +329,32 @@ function setupAuth(){
  const hash=location.hash||"";
  const params=new URLSearchParams(location.search||"");
  if(hash.includes("access_token")||hash.includes("type=recovery")){window.__EN_PASSWORD_RECOVERY=true}
+ if(params.get("auth")==="invite" && params.get("invite")){
+   setTimeout(async()=>{
+     try{
+       const session=(await sb.auth.getSession()).data.session;
+       if(session?.user){
+         const token=params.get("invite");
+         const h=await hashInviteToken(token);
+         const {data,error}=await sb.rpc("claim_private_invitation",{p_token_hash:h});
+         const game=Array.isArray(data)?data[0]:data;
+         if(error)throw error;
+         if(game?.game_id){
+           EN_GAME={id:game.game_id,experience:game.experience||"Se découvrir",invite_code:game.invite_code||""};
+           EN_USER=session.user;
+           try{const {data:part}=await sb.from("participants").select("*").eq("game_id",game.game_id).eq("user_id",session.user.id).maybeSingle();EN_PARTICIPANT=part||null}catch(_){}
+           remotePartnerName=game.inviter_name||"";
+           window.__privateInviteVerified=true;
+           startGame(game.experience||"Se découvrir",{remote:true,dice:game.experience==="Le dé ENTRE NOUS",partnerName:game.inviter_name||"",inviteCode:game.invite_code||""});
+           if(history.replaceState)history.replaceState({},document.title,EN_APP_URL());
+           toast(`Bienvenue ${game.invitee_name||""} ❤️`);
+           return;
+         }
+       }
+       handlePrivateInvite();
+     }catch(e){console.error("Retour invitation:",e);handlePrivateInvite();}
+   },700);
+ }
  if(params.get("auth")==="confirm"){
    localStorage.setItem("EN_PENDING_PASSWORD_SETUP","1");
    setTimeout(()=>{
@@ -336,7 +362,7 @@ function setupAuth(){
      const msg=document.getElementById("accountStatus");
      if(msg)msg.textContent="✅ Ton e-mail vient d’être confirmé. Tu es de retour dans ENTRE NOUS ❤️";
      go("profile",false);
-     if(history.replaceState){history.replaceState({},document.title,EN_PUBLIC_BASE_URL)}
+     if(history.replaceState){history.replaceState({},document.title,EN_PUBLIC_BASE_URL())}
    },900);
  }
 }
@@ -797,7 +823,7 @@ async function verifyPrivateInvite(){
    const h=await hashInviteToken(token);const {data,error}=await sb.rpc('get_private_invitation',{p_token_hash:h});const inv=Array.isArray(data)?data[0]:data;
    if(error||!inv)return toast('Invitation invalide ou expirée.');
    if(email!==String(inv.invitee_email||'').toLowerCase())return toast('Cette adresse e-mail ne correspond pas à l’invitation.');
-   const {error:otpError}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});if(otpError)throw otpError;
+   const {error:otpError}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:INVITE_AUTH_REDIRECT(token)}});if(otpError)throw otpError;
    window.__pendingPrivateInvite={tokenHash:h,email,inv};
    const box=document.getElementById('enInviteVerify');if(box){box.querySelector('#inviteVerifyStep1').classList.add('hidden');box.querySelector('#inviteVerifyStep2').classList.remove('hidden');box.querySelector('#inviteVerifyCode').focus();}
    toast('Code envoyé par e-mail 📧');
