@@ -791,25 +791,28 @@ function shareInvite(code,method){
  if(method==='wa')location.href='https://wa.me/?text='+encodeURIComponent(text);else if(method==='mail')location.href='mailto:?subject='+encodeURIComponent(`Invitation privée ENTRE NOUS — ${exp}`)+'&body='+encodeURIComponent(text);else{navigator.clipboard?.writeText(url);toast('Lien privé copié 🔒❤️')}
 }
 async function verifyPrivateInvite(){
- const token=new URLSearchParams(location.search).get('invite');if(!token)return toast('Invitation introuvable.');
- const email=(document.getElementById('inviteVerifyEmail')?.value||'').trim().toLowerCase();if(!email)return toast('Indique ton adresse e-mail.');
+ const box=document.getElementById('enInviteVerify');
+ const sendBtn=box?.querySelector('#inviteVerifyStep1 .btn');
+ if(sendBtn){sendBtn.disabled=true;sendBtn.textContent='Envoi du code… 📧';sendBtn.style.opacity='.7';}
+ const token=new URLSearchParams(location.search).get('invite');if(!token){if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='Recevoir mon code 📧';sendBtn.style.opacity='';}return toast('Invitation introuvable.');}
+ const email=(document.getElementById('inviteVerifyEmail')?.value||'').trim().toLowerCase();if(!email){if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='Recevoir mon code 📧';sendBtn.style.opacity='';}return toast('Indique ton adresse e-mail.');}
  try{
    const h=await hashInviteToken(token);const {data,error}=await sb.rpc('get_private_invitation',{p_token_hash:h});const inv=Array.isArray(data)?data[0]:data;
-   if(error||!inv)return toast('Invitation invalide ou expirée.');
-   if(email!==String(inv.invitee_email||'').toLowerCase())return toast('Cette adresse e-mail ne correspond pas à l’invitation.');
+   if(error)throw error;if(!inv)throw new Error('Invitation invalide ou expirée.');
+   if(email!==String(inv.invitee_email||'').toLowerCase())throw new Error('Cette adresse e-mail ne correspond pas à l’invitation.');
    const {error:otpError}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
    if(otpError)throw otpError;
    window.__pendingPrivateInvite={tokenHash:h,email,inv};
-   const box=document.getElementById('enInviteVerify');
    if(box){
-     box.querySelector('#inviteVerifyStep1').classList.add('hidden');
-     box.querySelector('#inviteVerifyStep2').classList.remove('hidden');
+     box.querySelector('#inviteVerifyStep1')?.classList.add('hidden');
+     box.querySelector('#inviteVerifyStep2')?.classList.remove('hidden');
      const code=box.querySelector('#inviteVerifyCode');
      if(code)code.focus();
    }
    toast('E-mail envoyé 📧 Vérifie ta boîte mail (et les spams).');
  }catch(e){
    console.error('OTP invitation:',e);
+   if(sendBtn){sendBtn.disabled=false;sendBtn.textContent='Recevoir mon code 📧';sendBtn.style.opacity='';}
    const msg=e?.message||e?.details||e?.hint||'Impossible d’envoyer l’e-mail.';
    toast(msg);
  }
