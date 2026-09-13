@@ -204,7 +204,7 @@ async function trackEvent(eventName,metadata={},productKey=null,amount=null){try
 function isCreatorAdmin(){return !!EN_USER?.email&&EN_USER.email.toLowerCase()==="alcindor.anny@gmail.com"}
 async function loadCommercialMetrics(){if(!isCreatorAdmin())return;const box=document.getElementById("commercialMetrics");if(!box)return;box.innerHTML="<p class='small'>Chargement…</p>";try{const {data,error}=await sb.rpc("get_commercial_metrics",{days_back:30});if(error)throw error;const m=data||{};const cards=[["👀","Visiteurs",m.visitors||0],["🎮","Joueurs",m.players||0],["👤","Comptes",m.accounts||0],["💎","Clics Premium",m.premium_clicks||0],["🔥","Clics packs",m.pack_clicks||0],["💳","Paiements détectés",m.payments_detected||0],["💶","CA indicatif",(Number(m.indicative_revenue||0)).toFixed(2)+" €"],["🔄","Sessions récurrentes",m.returning_sessions||0]];box.innerHTML=cards.map(x=>`<div class="card" style="cursor:default"><div style="font-size:22px">${x[0]}</div><b>${x[2]}</b><p class="small">${x[1]}</p></div>`).join("")}catch(e){console.error(e);box.innerHTML="<p class='small'>Statistiques indisponibles pour le moment.</p>"}}
 function renderCommercialAdmin(){const panel=document.getElementById("commercialAdminPanel");if(!panel)return;panel.classList.toggle("hidden",!isCreatorAdmin());if(isCreatorAdmin())loadCommercialMetrics()}
-const EN_PUBLIC_BASE_URL=()=>location.origin+location.pathname; const AUTH_REDIRECT=()=>EN_PUBLIC_BASE_URL()+"?auth=confirm"; const INVITE_AUTH_REDIRECT=(token)=>EN_PUBLIC_BASE_URL()+"?auth=invite&invite="+encodeURIComponent(token);
+const EN_APP_URL=()=>location.origin+location.pathname; const EN_PUBLIC_BASE_URL=EN_APP_URL; const AUTH_REDIRECT=()=>EN_APP_URL()+"?auth=confirm"; const INVITE_AUTH_REDIRECT=(token)=>EN_APP_URL()+"?auth=invite&invite="+encodeURIComponent(token);
 function isAnonymousUser(u=EN_USER){return !!u?.is_anonymous}
 function passwordOk(p){return typeof p==="string"&&p.length>=8}
 function setAccountMessage(text,ok=false){const el=document.getElementById("accountStatus");if(el){el.textContent=text;el.style.color=ok?"#8fd8a8":""}}
@@ -329,32 +329,6 @@ function setupAuth(){
  const hash=location.hash||"";
  const params=new URLSearchParams(location.search||"");
  if(hash.includes("access_token")||hash.includes("type=recovery")){window.__EN_PASSWORD_RECOVERY=true}
- if(params.get("auth")==="invite" && params.get("invite")){
-   setTimeout(async()=>{
-     try{
-       const session=(await sb.auth.getSession()).data.session;
-       if(session?.user){
-         const token=params.get("invite");
-         const h=await hashInviteToken(token);
-         const {data,error}=await sb.rpc("claim_private_invitation",{p_token_hash:h});
-         const game=Array.isArray(data)?data[0]:data;
-         if(error)throw error;
-         if(game?.game_id){
-           EN_GAME={id:game.game_id,experience:game.experience||"Se découvrir",invite_code:game.invite_code||""};
-           EN_USER=session.user;
-           try{const {data:part}=await sb.from("participants").select("*").eq("game_id",game.game_id).eq("user_id",session.user.id).maybeSingle();EN_PARTICIPANT=part||null}catch(_){}
-           remotePartnerName=game.inviter_name||"";
-           window.__privateInviteVerified=true;
-           startGame(game.experience||"Se découvrir",{remote:true,dice:game.experience==="Le dé ENTRE NOUS",partnerName:game.inviter_name||"",inviteCode:game.invite_code||""});
-           if(history.replaceState)history.replaceState({},document.title,EN_APP_URL());
-           toast(`Bienvenue ${game.invitee_name||""} ❤️`);
-           return;
-         }
-       }
-       handlePrivateInvite();
-     }catch(e){console.error("Retour invitation:",e);handlePrivateInvite();}
-   },700);
- }
  if(params.get("auth")==="confirm"){
    localStorage.setItem("EN_PENDING_PASSWORD_SETUP","1");
    setTimeout(()=>{
@@ -362,7 +336,7 @@ function setupAuth(){
      const msg=document.getElementById("accountStatus");
      if(msg)msg.textContent="✅ Ton e-mail vient d’être confirmé. Tu es de retour dans ENTRE NOUS ❤️";
      go("profile",false);
-     if(history.replaceState){history.replaceState({},document.title,EN_PUBLIC_BASE_URL())}
+     if(history.replaceState){history.replaceState({},document.title,EN_APP_URL())}
    },900);
  }
 }
@@ -863,34 +837,40 @@ Progression : ${percent}%
 Cartes répondues : ${done}/${total}${savedResult?`\n${savedResult}`:""}`;if(navigator.share)navigator.share({title:"Récapitulatif ENTRE NOUS",text});else{navigator.clipboard?.writeText(text);toast("Récapitulatif copié")}if(S.profile?.email){setTimeout(()=>{if(confirm("Envoyer aussi le récapitulatif par e-mail ?"))location.href=`mailto:${S.profile.email}?subject=${encodeURIComponent("Mon récapitulatif ENTRE NOUS")}&body=${encodeURIComponent(text)}`},50)}}
 
 
-function showInviteWelcome(inviter,invited,experience){
-  let box=document.getElementById("enInviteWelcome");
-  if(!box){
-    box=document.createElement("div");
-    box.id="enInviteWelcome";
-    box.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.88);backdrop-filter:blur(10px)";
-    box.innerHTML=`<div style="width:min(520px,100%);text-align:center;padding:34px 24px;border-radius:28px;background:var(--card,#171717);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 80px rgba(0,0,0,.45)">
-      <div style="font-size:48px;margin-bottom:12px">❤️</div>
-      <div class="eyebrow">ENTRE NOUS</div>
-      <h1 style="margin:8px 0 14px">Bienvenue <span id="enInviteWelcomeName"></span> 👋</h1>
-      <p class="p" style="font-size:18px">Tu as été invité(e) par <strong id="enInviteWelcomeFrom"></strong> à participer à cette activité.</p>
-      <div class="panel" style="margin:22px 0;text-align:left">
-        <div class="small">🎮 Activité</div>
-        <strong id="enInviteWelcomeExp" style="font-size:20px"></strong>
-      </div>
-      <button class="btn" id="enInviteWelcomeStart">Commencer ❤️</button>
-    </div>`;
-    document.body.appendChild(box);
-  }
-  document.getElementById("enInviteWelcomeName").textContent=invited;
-  document.getElementById("enInviteWelcomeFrom").textContent=inviter;
-  document.getElementById("enInviteWelcomeExp").textContent=experience;
-  const start=document.getElementById("enInviteWelcomeStart");
-  start.onclick=()=>{
-    box.remove();
-    setTimeout(()=>joinInvite().catch(e=>console.error(e)),100);
-  };
+// Retour après clic sur le lien e-mail d'une invitation : conserver le token et ouvrir directement l'activité.
+if(new URLSearchParams(location.search).get("auth")==="invite" && new URLSearchParams(location.search).get("invite")){
+  setTimeout(async()=>{
+    try{
+      const session=(await sb.auth.getSession()).data.session;
+      if(session?.user){
+        const token=new URLSearchParams(location.search).get("invite");
+        const h=await hashInviteToken(token);
+        const {data,error}=await sb.rpc("claim_private_invitation",{p_token_hash:h});
+        const game=Array.isArray(data)?data[0]:data;
+        if(error)throw error;
+        if(game?.game_id){
+          EN_GAME={id:game.game_id,experience:game.experience||"Se découvrir",invite_code:game.invite_code||""};
+          EN_USER=session.user;
+          try{
+            const {data:part}=await sb.from("participants").select("*").eq("game_id",game.game_id).eq("user_id",session.user.id).maybeSingle();
+            EN_PARTICIPANT=part||null;
+          }catch(_){}
+          remotePartnerName=game.inviter_name||"";
+          window.__privateInviteVerified=true;
+          startGame(game.experience||"Se découvrir",{remote:true,dice:game.experience==="Le dé ENTRE NOUS",partnerName:game.inviter_name||"",inviteCode:game.invite_code||""});
+          if(history.replaceState)history.replaceState({},document.title,EN_APP_URL());
+          toast(`Bienvenue ${game.invitee_name||""} ❤️`);
+          return;
+        }
+      }
+      handlePrivateInvite();
+    }catch(e){
+      console.error("Retour invitation:",e);
+      handlePrivateInvite();
+    }
+  },700);
 }
+
 setupAuth();renderCards();renderProfile();applyTheme();
 setTimeout(()=>trackEvent("app_opened",{source:location.protocol}),300);
 refreshEntitlements();
@@ -898,7 +878,7 @@ const params=new URLSearchParams(location.search);
 if(params.get("reset")==="1")window.__EN_PASSWORD_RECOVERY=true;
 if(params.get("payment")==="success"){trackEvent("payment_success",{source:"stripe_redirect"});toast("Paiement reçu ❤️ Activation de ton accès...");setTimeout(refreshEntitlements,1800);}
 const invite=params.get("invite");
-if(invite){setTimeout(()=>handlePrivateInvite(),250);}
+if(invite && params.get("auth")!=="invite"){setTimeout(()=>handlePrivateInvite(),250);}
 </script>
 <button id="enBottomReturn" class="en-bottom-return" type="button" aria-label="Retour" onclick="enBottomBack()">↩</button>
 <div id="challengeChooser" class="en-choice-modal" aria-hidden="true">
