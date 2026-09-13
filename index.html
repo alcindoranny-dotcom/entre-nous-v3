@@ -797,11 +797,22 @@ async function verifyPrivateInvite(){
    const h=await hashInviteToken(token);const {data,error}=await sb.rpc('get_private_invitation',{p_token_hash:h});const inv=Array.isArray(data)?data[0]:data;
    if(error||!inv)return toast('Invitation invalide ou expirée.');
    if(email!==String(inv.invitee_email||'').toLowerCase())return toast('Cette adresse e-mail ne correspond pas à l’invitation.');
-   const {error:otpError}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:INVITE_AUTH_REDIRECT(token)}});if(otpError)throw otpError;
+   const {error:otpError}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
+   if(otpError)throw otpError;
    window.__pendingPrivateInvite={tokenHash:h,email,inv};
-   const box=document.getElementById('enInviteVerify');if(box){box.querySelector('#inviteVerifyStep1').classList.add('hidden');box.querySelector('#inviteVerifyStep2').classList.remove('hidden');box.querySelector('#inviteVerifyCode').focus();}
-   toast('Code envoyé par e-mail 📧');
- }catch(e){console.error(e);toast(e?.message||'Impossible d’envoyer le code.');}
+   const box=document.getElementById('enInviteVerify');
+   if(box){
+     box.querySelector('#inviteVerifyStep1').classList.add('hidden');
+     box.querySelector('#inviteVerifyStep2').classList.remove('hidden');
+     const code=box.querySelector('#inviteVerifyCode');
+     if(code)code.focus();
+   }
+   toast('E-mail envoyé 📧 Vérifie ta boîte mail (et les spams).');
+ }catch(e){
+   console.error('OTP invitation:',e);
+   const msg=e?.message||e?.details||e?.hint||'Impossible d’envoyer l’e-mail.';
+   toast(msg);
+ }
 }
 async function confirmPrivateInvite(){
  const p=window.__pendingPrivateInvite;if(!p)return toast('Demande un nouveau code.');const token=(document.getElementById('inviteVerifyCode')?.value||'').trim();if(!/^\d{6}$/.test(token))return toast('Entre le code à 6 chiffres reçu par e-mail.');
@@ -822,7 +833,7 @@ function showInviteWelcome(inviter,invited,experience,token){
  document.getElementById('enInviteWelcomeStart').onclick=()=>{box.remove();showInviteVerify(inviter,invited,experience,token)};
 }
 function showInviteVerify(inviter,invited,experience,token){
- let box=document.getElementById('enInviteVerify');if(!box){box=document.createElement('div');box.id='enInviteVerify';box.style.cssText='position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.9);backdrop-filter:blur(12px)';box.innerHTML=`<div style="width:min(520px,100%);padding:30px 24px;border-radius:28px;background:var(--card,#171717);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 80px rgba(0,0,0,.5)"><div class="eyebrow">🔒 Invitation privée</div><h2>Confirme ton identité</h2><p class="small">Cette invitation est réservée à <b>${esc(invited)}</b>. Pour éviter qu’un lien transféré puisse être utilisé par quelqu’un d’autre, nous vérifions l’adresse e-mail de l’invité(e).</p><div id="inviteVerifyStep1"><input id="inviteVerifyEmail" class="input" type="email" autocomplete="email" placeholder="Ton adresse e-mail"><button class="btn" style="margin-top:10px" onclick="verifyPrivateInvite()">Recevoir mon code 📧</button></div><div id="inviteVerifyStep2" class="hidden"><input id="inviteVerifyCode" class="input" inputmode="numeric" maxlength="6" placeholder="Code à 6 chiffres"><button class="btn" style="margin-top:10px" onclick="confirmPrivateInvite()">Valider et rejoindre ❤️</button></div><p class="fine" style="margin-top:14px">🎮 ${esc(experience)}</p></div>`;document.body.appendChild(box)}
+ let box=document.getElementById('enInviteVerify');if(!box){box=document.createElement('div');box.id='enInviteVerify';box.style.cssText='position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.9);backdrop-filter:blur(12px)';box.innerHTML=`<div style="width:min(520px,100%);padding:30px 24px;border-radius:28px;background:var(--card,#171717);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 80px rgba(0,0,0,.5)"><div class="eyebrow">🔒 Invitation privée</div><h2>Confirme ton identité</h2><p class="small">Cette invitation est réservée à <b>${esc(invited)}</b>. Pour éviter qu’un lien transféré puisse être utilisé par quelqu’un d’autre, nous vérifions l’adresse e-mail de l’invité(e).</p><div id="inviteVerifyStep1"><input id="inviteVerifyEmail" class="input" type="email" autocomplete="email" placeholder="Ton adresse e-mail"><button class="btn" style="margin-top:10px" onclick="verifyPrivateInvite()">Recevoir mon code 📧</button></div><div id="inviteVerifyStep2" class="hidden"><p class="small">Un e-mail vient de partir. Entre ici le code reçu à 6 chiffres.</p><input id="inviteVerifyCode" class="input" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="Code à 6 chiffres"><button class="btn" style="margin-top:10px" onclick="confirmPrivateInvite()">Valider et rejoindre ❤️</button><button class="btn ghost" style="margin-top:9px" onclick="verifyPrivateInvite()">Renvoyer le code 📧</button></div><p class="fine" style="margin-top:14px">🎮 ${esc(experience)}</p></div>`;document.body.appendChild(box)}
 }
 async function handlePrivateInvite(){
  const token=new URLSearchParams(location.search).get('invite');if(!token)return;
