@@ -144,6 +144,7 @@ body.light .progress{background:#eee5e9}
 <div class="dice" id="dice">🎲</div>
 <div class="dice-face" id="diceTheme">Lance le dé pour choisir un thème</div>
 <button class="btn" onclick="rollDice()">Lancer le dé</button>
+<button id="diceFinishBtn" class="btn ghost hidden" style="margin-top:9px" onclick="finishDice()">🏁 Fin de la partie</button>
 <p class="remote-note" id="remoteNote"></p>
 </div>
 <div class="panel"><span class="badge" id="round"></span><span class="badge" id="meta"></span><div class="small" id="playersLine" style="margin-top:7px"></div></div>
@@ -154,7 +155,7 @@ body.light .progress{background:#eee5e9}
 <div class="actions" style="margin-top:9px"><button class="btn" onclick="saveAnswer()">Enregistrer ma réponse</button><button class="btn wa" onclick="shareCurrentQuestion()">📱 WhatsApp</button></div><button class="btn ghost" style="margin-top:9px" onclick="openMemory()">💾 Garder un souvenir maintenant</button>
 </section>
 
-<section id="finish" class="screen"><button class="back btn ghost" onclick="backToGame()">← Retour à la partie</button><div class="hero"><div class="eyebrow" id="finishEyebrow">Souvenir</div><h1 id="finishTitle">Ce moment reste entre nous.</h1><p class="p">Tu peux enregistrer un souvenir à tout moment, même si toutes les questions ne sont pas terminées.</p><textarea id="note" class="textarea" placeholder="Une note, un souvenir, une phrase à garder…"></textarea><button class="btn" id="saveMemoryBtn" onclick="saveMemory()">Enregistrer le souvenir ❤️</button><button class="btn ghost" style="margin-top:9px" onclick="shareRecap()">Partager le récapitulatif</button><button class="btn ghost" style="margin-top:9px" onclick="backToGame()">← Revenir à la question</button></div></section>
+<section id="finish" class="screen"><button class="back btn ghost" onclick="backToGame()">← Retour à la partie</button><div class="hero"><div class="eyebrow" id="finishEyebrow">Souvenir</div><h1 id="finishTitle">Ce moment reste entre nous.</h1><p class="p">Tu peux enregistrer un souvenir à tout moment, même si toutes les questions ne sont pas terminées.</p><div id="diceFinishBox" class="panel hidden" style="margin:12px 0"><b>🎲 Tes réponses</b><p class="small" id="diceFinishCount" style="margin:6px 0"></p><div id="diceFinishSummary"></div><button class="btn wa" style="margin-top:10px" onclick="sendDiceResponses()">📱 Envoyer mes réponses au partenaire</button></div><textarea id="note" class="textarea" placeholder="Une note, un souvenir, une phrase à garder…"></textarea><button class="btn" id="saveMemoryBtn" onclick="saveMemory()">Enregistrer le souvenir ❤️</button><button class="btn ghost" style="margin-top:9px" onclick="shareRecap()">Partager le récapitulatif</button><button class="btn ghost" style="margin-top:9px" onclick="backToGame()">← Revenir à la question</button></div></section>
 
 <section id="sessions" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button><div class="hero"><div class="eyebrow">Mes parties</div><h1>Reprendre.</h1><div id="sessionList"></div></div></section>
 
@@ -502,7 +503,7 @@ const PACK_EXP=new Set(["Couple","Sexfriend","Libertin","10 ans ou plus"]);
 const PACK_PRICE="1 €"; const PREMIUM_PRICE="4,99 €";
 
 let S=JSON.parse(localStorage.getItem("EN_MASTER")||'{"profile":{},"sessions":[],"memories":[],"partners":[],"premium":false}');
-let cur=null,hist=[],diceMode=false,remoteMode=false,remotePartnerName="",diceHistory={},currentTheme=null;
+let cur=null,hist=[],diceMode=false,remoteMode=false,remotePartnerName="",diceHistory={},diceQuestionHistory={},currentTheme=null;
 
 function toast(t){const x=document.getElementById("toast");x.textContent=t;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),1800)}
 function save(){localStorage.setItem("EN_MASTER",JSON.stringify(S))}
@@ -635,9 +636,9 @@ if(name==="Défis absurdes"){
  trackEvent("game_started",{game:name,remote:!!remoteMode,challengeLevel:opts.challengeLevel});
  go("game");setupGameUI();renderQuestion();return;
 }
-diceMode=name==="Le dé ENTRE NOUS"||opts.dice===true;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};
-let questions=(Q[name]||Q["Se découvrir"]);if(PACK_EXP.has(name)&&!hasPack(name))questions=questions.slice(0,4);cur={name,qs:diceMode?[]:questions,i:0,a:[],theme:null,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""};
-S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();trackEvent("game_started",{game:name,dice:!!diceMode,remote:!!remoteMode});go("game");setupGameUI();
+diceMode=name==="Le dé ENTRE NOUS"||opts.dice===true;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};diceQuestionHistory={};
+let questions=(Q[name]||Q["Se découvrir"]);if(PACK_EXP.has(name)&&!hasPack(name))questions=questions.slice(0,4);cur={name,qs:diceMode?[]:questions,i:0,a:[],theme:null,diceAnswers:[],diceTurn:0,diceCurrent:null,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""};
+S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",diceAnswers:[],diceTurn:0,diceQuestionHistory:{}});S.sessions=S.sessions.slice(0,30);save();trackEvent("game_started",{game:name,dice:!!diceMode,remote:!!remoteMode});go("game");setupGameUI();
 if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes";bar.style.width="0%";answer.value="";return}
 renderQuestion();
 try{await ensureGame(name);await syncProfile()}catch(e){console.error(e);toast("Mode local : synchronisation à vérifier")}
@@ -673,7 +674,7 @@ function enExperienceModeFields(){
  if(window.EN_EXP_PRESENCE==="distance")b.innerHTML+='<p class="small">🌍 À distance · partage possible par WhatsApp.</p>';
 }
 
-function setupGameUI(){const cp=document.getElementById("challengeLevelPanel");if(cp&&(!cur||cur.name!=="Défis absurdes")){cp.classList.add("hidden");cp.innerHTML="";}const pb=document.getElementById("enProfileChoices"),pa=document.getElementById("answer");if(pb&&(!cur||cur.name!=="Quel est ton profil ?"))pb.classList.add("hidden");if(pa)pa.classList.toggle("hidden",!!(cur&&cur.name==="Quel est ton profil ?")||!!(cur&&cur.name==="Défis absurdes"));document.getElementById("dicePanel").classList.toggle("hidden",!diceMode);remoteNote.textContent=remoteMode?"🌍 Partie à distance : chaque question peut être envoyée avec le lien de la partie.":"";playersLine.textContent=(S.profile?.name||remotePartnerName)?`👥 À deux · ${S.profile?.name||"Moi"}${remotePartnerName?` · ${remotePartnerName}`:""}`:"👥 Partie solo"}
+function setupGameUI(){const cp=document.getElementById("challengeLevelPanel");if(cp&&(!cur||cur.name!=="Défis absurdes")){cp.classList.add("hidden");cp.innerHTML="";}const pb=document.getElementById("enProfileChoices"),pa=document.getElementById("answer");if(pb&&(!cur||cur.name!=="Quel est ton profil ?"))pb.classList.add("hidden");if(pa)pa.classList.toggle("hidden",!!(cur&&cur.name==="Quel est ton profil ?")||!!(cur&&cur.name==="Défis absurdes"));document.getElementById("dicePanel").classList.toggle("hidden",!diceMode);const df=document.getElementById("diceFinishBtn");if(df)df.classList.toggle("hidden",!diceMode);remoteNote.textContent=remoteMode?"🌍 Partie à distance : chaque question peut être envoyée avec le lien de la partie.":"";playersLine.textContent=(S.profile?.name||remotePartnerName)?`👥 À deux · ${S.profile?.name||"Moi"}${remotePartnerName?` · ${remotePartnerName}`:""}`:"👥 Partie solo"}
 function rollDice(){
 if(!diceMode)return;
 if(window.__enDiceTimer)clearInterval(window.__enDiceTimer);
@@ -685,13 +686,22 @@ if(!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches){
  window.__enDiceTimer=setInterval(()=>{dice.textContent=faces[Math.floor(Math.random()*6)];ticks++;if(ticks>=7){clearInterval(window.__enDiceTimer);window.__enDiceTimer=null;dice.classList.remove("rolling");dice.textContent=faces[face];}},100);
 }else{dice.textContent=faces[face];}
 currentTheme=theme;cur.theme=theme;
-const qs=Q[theme]||[];const used=diceHistory[theme]||0;diceHistory[theme]=used+1;cur.qs=qs;cur.i=used%qs.length;cur.a=cur.a||[];
+const qs=Q[theme]||[];
+if(!qs.length)return toast("Aucune question disponible pour ce thème.");
+const used=Array.isArray(diceQuestionHistory[theme])?diceQuestionHistory[theme]:[];
+let available=qs.map((_,i)=>i).filter(i=>!used.includes(i));
+if(!available.length){diceQuestionHistory[theme]=[];available=qs.map((_,i)=>i);}
+const qIndex=available[Math.floor(Math.random()*available.length)];
+diceQuestionHistory[theme]=[...used,qIndex];
+cur.qs=qs;cur.i=qIndex;cur.a=cur.a||[];cur.diceTurn=(cur.diceTurn||0)+1;
+cur.diceCurrent={theme,questionIndex:qIndex,question:qs[qIndex],key:theme+"::"+qIndex+"::"+cur.diceTurn,answer:"",saved:false};
+if(S.sessions[0]){S.sessions[0].diceTurn=cur.diceTurn;S.sessions[0].diceQuestionHistory=diceQuestionHistory;save();}
 setTimeout(()=>{diceTheme.textContent=theme;renderQuestion();},800);
 }
 function renderQuestion(){
 const q=cur.qs[cur.i];if(!q)return;
 round.textContent=cur.name==="Défis absurdes"?`🎭 Défis absurdes · ${cur.challengeLevel==="hard"?"🔴 Hard":"🟢 Soft"}`:(cur.theme||cur.name);
-meta.textContent=cur.name==="Défis absurdes"?`Défi ${cur.i+1} sur ${cur.qs.length}`:`Carte ${cur.i+1} sur ${cur.qs.length}`;
+meta.textContent=cur.name==="Défis absurdes"?`Défi ${cur.i+1} sur ${cur.qs.length}`:diceMode?`Question ${cur.diceTurn||1}`:`Carte ${cur.i+1} sur ${cur.qs.length}`;
 question.textContent=q;question.classList.remove("challenge-stage");
 if(cur.name==="Défis absurdes"){
  answer.classList.add("hidden");
@@ -701,28 +711,86 @@ if(cur.name==="Défis absurdes"){
  ca.classList.add("challenge-done");setTimeout(()=>ca.classList.remove("challenge-done"),350);
 }else{
  const ca=document.getElementById("challengeActions");if(ca)ca.remove();
- answer.classList.remove("hidden");answer.value=cur.a[cur.i]||"";
+ answer.classList.remove("hidden");answer.value=diceMode?(cur.diceCurrent?.answer||""):(cur.a[cur.i]||"");
 }
-bar.style.width=(cur.i/cur.qs.length*100)+"%";
+bar.style.width=diceMode?"100%":(cur.i/cur.qs.length*100)+"%";
 }
 function markChallenge(done){if(!cur||cur.name!=="Défis absurdes")return;cur.a[cur.i]=done?"Défi réalisé":"Défi non atteint";if(S.sessions[0]){S.sessions[0].a=cur.a;S.sessions[0].challengeLevel=cur.challengeLevel;save();}setTimeout(next,180)}
 function next(){
+if(diceMode){
+ if(S.sessions[0]){S.sessions[0].i=cur.diceTurn||0;S.sessions[0].a=cur.a;S.sessions[0].diceAnswers=cur.diceAnswers||[];S.sessions[0].diceQuestionHistory=diceQuestionHistory}
+ save();question.textContent="Lance le dé pour une nouvelle question.";answer.value="";diceTheme.textContent=currentTheme?`Dernier thème : ${currentTheme}`:"Lance le dé pour choisir un thème";bar.style.width="100%";return;
+}
 cur.i++;
-if(cur.i>=cur.qs.length){if(diceMode){question.textContent="Lance à nouveau le dé pour un autre thème.";answer.value="";bar.style.width="100%";return}finish();return}
+if(cur.i>=cur.qs.length){finish();return}
 S.sessions[0].i=cur.i;S.sessions[0].a=cur.a;save();renderQuestion()
 }
-async function saveAnswer(){cur.a[cur.i]=answer.value.trim();try{await saveAnswerRemote(cur.i,cur.qs[cur.i],cur.a[cur.i],false)}catch(e){console.error(e)}S.sessions[0].a=cur.a;save();next()}
-async function skip(){cur.a[cur.i]="";try{await saveAnswerRemote(cur.i,cur.qs[cur.i],null,false)}catch(e){console.error(e)}S.sessions[0].skipped=(S.sessions[0].skipped||[]).concat(cur.i);save();next()}
-async function discuss(){cur.a[cur.i]=answer.value.trim();try{await saveAnswerRemote(cur.i,cur.qs[cur.i],cur.a[cur.i],true)}catch(e){console.error(e)}S.sessions[0].discuss=(S.sessions[0].discuss||[]).concat(cur.i);save();toast("Ajoutée à « On en rediscute »");next()}
+function rememberDiceAnswer(value,discussed=false){
+ if(!diceMode||!cur.diceCurrent)return;
+ const row={key:cur.diceCurrent.key,theme:cur.diceCurrent.theme,questionIndex:cur.diceCurrent.questionIndex,question:cur.diceCurrent.question,answer:value||"",discussed:!!discussed};
+ const idx=(cur.diceAnswers||[]).findIndex(x=>x.key===row.key);
+ if(idx>=0)cur.diceAnswers[idx]=row;else(cur.diceAnswers||(cur.diceAnswers=[])).push(row);
+ cur.diceCurrent.answer=value||"";cur.diceCurrent.saved=true;
+ if(S.sessions[0])S.sessions[0].diceAnswers=cur.diceAnswers;
+}
+async function saveAnswer(){
+const value=answer.value.trim();cur.a[cur.i]=value;
+if(diceMode)rememberDiceAnswer(value,false);
+try{await saveAnswerRemote(diceMode?Math.max(0,(cur.diceTurn||1)-1):cur.i,cur.qs[cur.i],value,false)}catch(e){console.error(e)}
+S.sessions[0].a=cur.a;save();next()
+}
+async function skip(){
+cur.a[cur.i]="";
+try{await saveAnswerRemote(diceMode?Math.max(0,(cur.diceTurn||1)-1):cur.i,cur.qs[cur.i],null,false)}catch(e){console.error(e)}
+S.sessions[0].skipped=(S.sessions[0].skipped||[]).concat(cur.i);save();next()
+}
+async function discuss(){
+const value=answer.value.trim();cur.a[cur.i]=value;
+if(diceMode)rememberDiceAnswer(value,true);
+try{await saveAnswerRemote(diceMode?Math.max(0,(cur.diceTurn||1)-1):cur.i,cur.qs[cur.i],value,true)}catch(e){console.error(e)}
+S.sessions[0].discuss=(S.sessions[0].discuss||[]).concat(cur.i);save();toast("Ajoutée à « On en rediscute »");next()
+}
 function launchConfetti(){
  const layer=document.createElement("div");layer.className="en-confetti";
  for(let i=0;i<42;i++){const x=document.createElement("i");x.style.left=(Math.random()*100)+"%";x.style.animationDelay=(Math.random()*.25)+"s";x.style.transform=`rotate(${Math.random()*180}deg)`;layer.appendChild(x)}
  document.body.appendChild(layer);setTimeout(()=>layer.remove(),1900);
 }
-function finish(){if(S.sessions[0]){S.sessions[0].status="Terminée";S.sessions[0].i=cur.qs.length;S.sessions[0].a=cur.a}save();launchConfetti();go("finish",false)}
+function finishDice(){
+if(!diceMode)return finish();
+const value=answer.value.trim();
+if(value&&cur.diceCurrent&&!cur.diceCurrent.saved){
+ rememberDiceAnswer(value,false);
+ saveAnswerRemote(Math.max(0,(cur.diceTurn||1)-1),cur.diceCurrent.question,value,false).catch(e=>console.error(e));
+}
+finish();
+}
+function renderDiceFinish(){
+const box=document.getElementById("diceFinishBox"),summary=document.getElementById("diceFinishSummary"),count=document.getElementById("diceFinishCount");
+if(!box)return;
+if(!diceMode){box.classList.add("hidden");return}
+const answers=(cur?.diceAnswers||[]).filter(x=>x.answer?.trim());
+box.classList.remove("hidden");
+if(count)count.textContent=`${answers.length} réponse${answers.length>1?"s":""} enregistrée${answers.length>1?"s":""}`;
+if(summary)summary.innerHTML=answers.length?answers.map((x,i)=>`<div class="panel" style="margin-top:8px"><b>${i+1}. ${esc(x.theme||"Thème")}</b><p class="small" style="margin:7px 0 4px"><b>Question :</b> ${esc(x.question)}</p><p class="small" style="margin:0"><b>Réponse :</b> ${esc(x.answer)}</p></div>`).join(""):"<p class=\"small\">Aucune réponse enregistrée. Tu peux quand même terminer la partie.</p>";
+}
+function buildDiceResponsesText(){
+const answers=(cur?.diceAnswers||[]).filter(x=>x.answer?.trim());
+if(!answers.length)return"";
+const lines=answers.map((x,i)=>`${i+1}. [${x.theme}] ${x.question}\n→ ${x.answer}`);
+const partner=remotePartnerName?remotePartnerName:"ton partenaire";
+return`ENTRE NOUS ❤️\n\n🎲 Mes réponses — Le dé ENTRE NOUS\n\n${lines.join("\n\n")}\n\nÀ toi, ${partner}, de répondre 😉`;
+}
+async function sendDiceResponses(){
+const text=buildDiceResponsesText();
+if(!text)return toast("Aucune réponse à envoyer pour le moment.");
+trackEvent("dice_responses_share",{count:(cur?.diceAnswers||[]).filter(x=>x.answer?.trim()).length});
+if(navigator.share){try{await navigator.share({title:"Mes réponses — Le dé ENTRE NOUS",text});return}catch(e){if(e?.name==="AbortError")return}}
+location.href="https://wa.me/?text="+encodeURIComponent(text);
+}
+function finish(){if(S.sessions[0]){S.sessions[0].status="Terminée";S.sessions[0].i=diceMode?(cur.diceTurn||0):cur.qs.length;S.sessions[0].a=cur.a;if(diceMode){S.sessions[0].diceAnswers=cur.diceAnswers||[];S.sessions[0].diceQuestionHistory=diceQuestionHistory}}save();launchConfetti();if(diceMode){document.getElementById("finishEyebrow").textContent="🎲 Le dé ENTRE NOUS";document.getElementById("finishTitle").textContent="Ta partie est terminée ❤️"}else{document.getElementById("finishEyebrow").textContent="Souvenir";document.getElementById("finishTitle").textContent="Ce moment reste entre nous."}go("finish",false);if(diceMode)renderDiceFinish()}
 function quit(){if(cur&&S.sessions[0]){S.sessions[0].i=cur.i;S.sessions[0].a=cur.a}save();go("sessions",false)}
 function renderSessions(){sessionList.innerHTML=S.sessions.length?S.sessions.map((s,i)=>`<div class="panel"><span class="badge">${s.status}</span><h3>${s.name}</h3><p class="small">Progression : ${Math.min(s.i||0,(s.diceMode?6:(Q[s.name]||[]).length))} cartes</p><div class="actions"><button class="btn" onclick="resume(${i})">Reprendre</button><button class="btn ghost" onclick="delSession(${i})">Supprimer</button></div></div>`).join(""):`<div class="empty">Aucune partie pour le moment.</div>`}
-function resume(i){const s=S.sessions[i];let questions=(Q[s.name]||Q["Se découvrir"]);if(PACK_EXP.has(s.name)&&!hasPack(s.name))questions=questions.slice(0,4);cur={name:s.name,qs:s.diceMode?[]:(s.name==="Défis absurdes"?(s.challengeLevel==="hard"?(Q[s.name]||[]):["Mange une petite bouchée de citron avec une pincée de sel.","Cours 10 mètres en faisant une démarche complètement ridicule.","Marche 10 pas les yeux fermés, guidé(e) par quelqu’un.","Fais une imitation pendant 30 secondes.","Danse sans musique pendant 20 secondes.","Fais deviner un objet sans parler.","Fais le tour de la pièce en marchant comme un pingouin.","Chante le refrain d’une chanson avec une voix ridicule."]):questions),i:s.i||0,a:s.a||[],theme:s.theme||null,challengeLevel:s.challengeLevel||null,inviteCode:s.inviteCode||""};diceMode=!!s.diceMode;remoteMode=!!s.remoteMode;remotePartnerName=s.partnerName||"";go("game");setupGameUI();if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes"}else renderQuestion()}
+function resume(i){const s=S.sessions[i];let questions=(Q[s.name]||Q["Se découvrir"]);if(PACK_EXP.has(s.name)&&!hasPack(s.name))questions=questions.slice(0,4);cur={name:s.name,qs:s.diceMode?[]:(s.name==="Défis absurdes"?(s.challengeLevel==="hard"?(Q[s.name]||[]):["Mange une petite bouchée de citron avec une pincée de sel.","Cours 10 mètres en faisant une démarche complètement ridicule.","Marche 10 pas les yeux fermés, guidé(e) par quelqu’un.","Fais une imitation pendant 30 secondes.","Danse sans musique pendant 20 secondes.","Fais deviner un objet sans parler.","Fais le tour de la pièce en marchant comme un pingouin.","Chante le refrain d’une chanson avec une voix ridicule."]):questions),i:s.i||0,a:s.a||[],theme:s.theme||null,challengeLevel:s.challengeLevel||null,inviteCode:s.inviteCode||"",diceAnswers:s.diceAnswers||[],diceTurn:s.diceTurn||0,diceCurrent:null};diceMode=!!s.diceMode;remoteMode=!!s.remoteMode;remotePartnerName=s.partnerName||"";diceQuestionHistory=s.diceQuestionHistory||{};go("game");setupGameUI();if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent=`${cur.diceTurn||0} question${(cur.diceTurn||0)>1?"s":""} déjà jouée${(cur.diceTurn||0)>1?"s":""}`;diceTheme.textContent="Prêt pour une nouvelle question";}else renderQuestion()}
 function delSession(i){S.sessions.splice(i,1);save();renderSessions()}
 function resumePartner(index){
  const p=S.partners[index];
