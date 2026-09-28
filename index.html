@@ -631,14 +631,14 @@ if(name==="Défis absurdes"){
  const hard=Q[name]||[];
  if(!opts.challengeLevel){openChallengeChooser();return}
  diceMode=false;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};
- cur={name,qs:(opts.challengeLevel==="hard"?hard:soft).slice(),i:0,a:[],theme:null,challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",roomCode:opts.roomCode||""};
+ cur={name,qs:(opts.challengeLevel==="hard"?hard:soft).slice(),i:0,a:[],theme:null,challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",roomCode:opts.roomCode||"",roomCode:opts.roomCode||""};
  S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode:false,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();
  trackEvent("game_started",{game:name,remote:!!remoteMode,challengeLevel:opts.challengeLevel});
  go("game");setupGameUI();renderQuestion();return;
 }
 diceMode=name==="Le dé ENTRE NOUS"||opts.dice===true;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};diceQuestionHistory={};
 let questions=(Q[name]||Q["Se découvrir"]);if(PACK_EXP.has(name)&&!hasPack(name))questions=questions.slice(0,4);cur={name,qs:diceMode?[]:questions,i:0,a:[],theme:null,diceAnswers:[],diceTurn:0,diceCurrent:null,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",roomCode:opts.roomCode||""};
-S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",diceAnswers:[],diceTurn:0,diceQuestionHistory:{}});S.sessions=S.sessions.slice(0,30);save();trackEvent("game_started",{game:name,dice:!!diceMode,remote:!!remoteMode});go("game");setupGameUI();
+S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",roomCode:opts.roomCode||"",diceAnswers:[],diceTurn:0,diceQuestionHistory:{}});S.sessions=S.sessions.slice(0,30);save();trackEvent("game_started",{game:name,dice:!!diceMode,remote:!!remoteMode});go("game");setupGameUI();
 if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes";bar.style.width="0%";answer.value="";return}
 renderQuestion();
 try{await ensureGame(name);await syncProfile()}catch(e){console.error(e);toast("Mode local : synchronisation à vérifier")}
