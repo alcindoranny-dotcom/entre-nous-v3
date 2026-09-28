@@ -151,10 +151,10 @@ body.light .progress{background:#eee5e9}
 <div class="question" id="question"></div>
 <textarea id="answer" class="textarea" placeholder="Ta réponse…"></textarea>
 <div class="actions"><button class="btn ghost" onclick="skip()">Je passe</button><button class="btn ghost" onclick="discuss()">On en rediscute</button></div>
-<div class="actions" style="margin-top:9px"><button class="btn" onclick="saveAnswer()">Enregistrer ma réponse</button><button class="btn wa" onclick="shareCurrentQuestion()">📱 WhatsApp</button></div><button class="btn ghost" style="margin-top:9px" onclick="openMemory()">💾 Garder un souvenir maintenant</button>
+<div class="actions" style="margin-top:9px"><button class="btn" onclick="saveAnswer()">Enregistrer ma réponse</button><button class="btn wa" onclick="shareCurrentQuestion()">📱 WhatsApp</button></div><button id="diceFinishBtn" class="btn ghost" style="margin-top:9px;display:none" onclick="finishDiceGame()">🏁 Finir le dé et préparer mes réponses</button><button class="btn ghost" style="margin-top:9px" onclick="openMemory()">💾 Garder un souvenir maintenant</button>
 </section>
 
-<section id="finish" class="screen"><button class="back btn ghost" onclick="backToGame()">← Retour à la partie</button><div class="hero"><div class="eyebrow" id="finishEyebrow">Souvenir</div><h1 id="finishTitle">Ce moment reste entre nous.</h1><p class="p">Tu peux enregistrer un souvenir à tout moment, même si toutes les questions ne sont pas terminées.</p><textarea id="note" class="textarea" placeholder="Une note, un souvenir, une phrase à garder…"></textarea><button class="btn" id="saveMemoryBtn" onclick="saveMemory()">Enregistrer le souvenir ❤️</button><button class="btn ghost" style="margin-top:9px" onclick="shareRecap()">Partager le récapitulatif</button><button class="btn ghost" style="margin-top:9px" onclick="backToGame()">← Revenir à la question</button></div></section>
+<section id="finish" class="screen"><button class="back btn ghost" onclick="backToGame()">← Retour à la partie</button><div class="hero"><div class="eyebrow" id="finishEyebrow">Souvenir</div><h1 id="finishTitle">Ce moment reste entre nous.</h1><p class="p">Tu peux enregistrer un souvenir à tout moment, même si toutes les questions ne sont pas terminées.</p><textarea id="note" class="textarea" placeholder="Une note, un souvenir, une phrase à garder…"></textarea><button class="btn" id="saveMemoryBtn" onclick="saveMemory()">Enregistrer le souvenir ❤️</button><button id="diceShareAnswersBtn" class="btn" style="margin-top:9px;display:none" onclick="shareDiceAnswers()">💌 Envoyer mes réponses à mon partenaire</button><button class="btn ghost" style="margin-top:9px" onclick="shareRecap()">Partager le récapitulatif</button><button class="btn ghost" style="margin-top:9px" onclick="backToGame()">← Revenir à la question</button></div></section>
 
 <section id="sessions" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button><div class="hero"><div class="eyebrow">Mes parties</div><h1>Reprendre.</h1><div id="sessionList"></div></div></section>
 
@@ -502,7 +502,7 @@ const PACK_EXP=new Set(["Couple","Sexfriend","Libertin","10 ans ou plus"]);
 const PACK_PRICE="1 €"; const PREMIUM_PRICE="4,99 €";
 
 let S=JSON.parse(localStorage.getItem("EN_MASTER")||'{"profile":{},"sessions":[],"memories":[],"partners":[],"premium":false}');
-let cur=null,hist=[],diceMode=false,remoteMode=false,remotePartnerName="",diceHistory={},currentTheme=null;
+let cur=null,hist=[],diceMode=false,remoteMode=false,remotePartnerName="",diceHistory={},currentTheme=null,diceAnswers=[];
 
 function toast(t){const x=document.getElementById("toast");x.textContent=t;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),1800)}
 function save(){localStorage.setItem("EN_MASTER",JSON.stringify(S))}
@@ -635,7 +635,7 @@ if(name==="Défis absurdes"){
  trackEvent("game_started",{game:name,remote:!!remoteMode,challengeLevel:opts.challengeLevel});
  go("game");setupGameUI();renderQuestion();return;
 }
-diceMode=name==="Le dé ENTRE NOUS"||opts.dice===true;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};
+diceMode=name==="Le dé ENTRE NOUS"||opts.dice===true;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};diceAnswers=[];
 let questions=(Q[name]||Q["Se découvrir"]);if(PACK_EXP.has(name)&&!hasPack(name))questions=questions.slice(0,4);cur={name,qs:diceMode?[]:questions,i:0,a:[],theme:null,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""};
 S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();trackEvent("game_started",{game:name,dice:!!diceMode,remote:!!remoteMode});go("game");setupGameUI();
 if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes";bar.style.width="0%";answer.value="";return}
@@ -673,7 +673,7 @@ function enExperienceModeFields(){
  if(window.EN_EXP_PRESENCE==="distance")b.innerHTML+='<p class="small">🌍 À distance · partage possible par WhatsApp.</p>';
 }
 
-function setupGameUI(){const cp=document.getElementById("challengeLevelPanel");if(cp&&(!cur||cur.name!=="Défis absurdes")){cp.classList.add("hidden");cp.innerHTML="";}const pb=document.getElementById("enProfileChoices"),pa=document.getElementById("answer");if(pb&&(!cur||cur.name!=="Quel est ton profil ?"))pb.classList.add("hidden");if(pa)pa.classList.toggle("hidden",!!(cur&&cur.name==="Quel est ton profil ?")||!!(cur&&cur.name==="Défis absurdes"));document.getElementById("dicePanel").classList.toggle("hidden",!diceMode);remoteNote.textContent=remoteMode?"🌍 Partie à distance : chaque question peut être envoyée avec le lien de la partie.":"";playersLine.textContent=(S.profile?.name||remotePartnerName)?`👥 À deux · ${S.profile?.name||"Moi"}${remotePartnerName?` · ${remotePartnerName}`:""}`:"👥 Partie solo"}
+function setupGameUI(){const cp=document.getElementById("challengeLevelPanel");if(cp&&(!cur||cur.name!=="Défis absurdes")){cp.classList.add("hidden");cp.innerHTML="";}const pb=document.getElementById("enProfileChoices"),pa=document.getElementById("answer");if(pb&&(!cur||cur.name!=="Quel est ton profil ?"))pb.classList.add("hidden");if(pa)pa.classList.toggle("hidden",!!(cur&&cur.name==="Quel est ton profil ?")||!!(cur&&cur.name==="Défis absurdes"));document.getElementById("dicePanel").classList.toggle("hidden",!diceMode);const df=document.getElementById("diceFinishBtn");if(df)df.style.display=diceMode?"block":"none";remoteNote.textContent=remoteMode?"🌍 Partie à distance : chaque question peut être envoyée avec le lien de la partie.":"";playersLine.textContent=(S.profile?.name||remotePartnerName)?`👥 À deux · ${S.profile?.name||"Moi"}${remotePartnerName?` · ${remotePartnerName}`:""}`:"👥 Partie solo"}
 function rollDice(){
 if(!diceMode)return;
 if(window.__enDiceTimer)clearInterval(window.__enDiceTimer);
@@ -711,14 +711,18 @@ cur.i++;
 if(cur.i>=cur.qs.length){if(diceMode){question.textContent="Lance à nouveau le dé pour un autre thème.";answer.value="";bar.style.width="100%";return}finish();return}
 S.sessions[0].i=cur.i;S.sessions[0].a=cur.a;save();renderQuestion()
 }
-async function saveAnswer(){cur.a[cur.i]=answer.value.trim();try{await saveAnswerRemote(cur.i,cur.qs[cur.i],cur.a[cur.i],false)}catch(e){console.error(e)}S.sessions[0].a=cur.a;save();next()}
-async function skip(){cur.a[cur.i]="";try{await saveAnswerRemote(cur.i,cur.qs[cur.i],null,false)}catch(e){console.error(e)}S.sessions[0].skipped=(S.sessions[0].skipped||[]).concat(cur.i);save();next()}
-async function discuss(){cur.a[cur.i]=answer.value.trim();try{await saveAnswerRemote(cur.i,cur.qs[cur.i],cur.a[cur.i],true)}catch(e){console.error(e)}S.sessions[0].discuss=(S.sessions[0].discuss||[]).concat(cur.i);save();toast("Ajoutée à « On en rediscute »");next()}
+function recordDiceAnswer(answerValue,discussed=false){if(!diceMode||!cur)return;const key=(cur.theme||"Thème")+"::"+cur.qs[cur.i];const existing=diceAnswers.find(x=>x.key===key);const item={key,theme:cur.theme||"Thème",question:cur.qs[cur.i],answer:answerValue||"",discussed};if(existing)Object.assign(existing,item);else diceAnswers.push(item)}
+async function saveAnswer(){const value=answer.value.trim();cur.a[cur.i]=value;if(diceMode)recordDiceAnswer(value,false);try{await saveAnswerRemote(diceMode?Date.now():cur.i,cur.qs[cur.i],value,false)}catch(e){console.error(e)}S.sessions[0].a=cur.a;S.sessions[0].diceAnswers=diceAnswers;save();next()}
+async function skip(){cur.a[cur.i]="";if(diceMode)recordDiceAnswer("",false);try{await saveAnswerRemote(diceMode?Date.now():cur.i,cur.qs[cur.i],null,false)}catch(e){console.error(e)}S.sessions[0].skipped=(S.sessions[0].skipped||[]).concat(cur.i);S.sessions[0].diceAnswers=diceAnswers;save();next()}
+async function discuss(){const value=answer.value.trim();cur.a[cur.i]=value;if(diceMode)recordDiceAnswer(value,true);try{await saveAnswerRemote(diceMode?Date.now():cur.i,cur.qs[cur.i],value,true)}catch(e){console.error(e)}S.sessions[0].discuss=(S.sessions[0].discuss||[]).concat(cur.i);S.sessions[0].diceAnswers=diceAnswers;save();toast("Ajoutée à « On en rediscute »");next()}
+function buildDiceAnswersText(){const list=diceAnswers.filter(x=>x.answer||x.discussed);if(!list.length)return "Je n’ai encore enregistré aucune réponse dans cette partie du dé ENTRE NOUS.";return list.map((x,i)=>`${i+1}. [${x.theme}] ${x.question}\nMa réponse : ${x.answer||"—"}${x.discussed?"\n💬 À rediscuter avec toi":""}`).join("\n\n")}
+function finishDiceGame(){if(!diceMode)return finish();const list=diceAnswers.filter(x=>x.answer||x.discussed);if(S.sessions[0]){S.sessions[0].status="Terminée";S.sessions[0].diceAnswers=diceAnswers;S.sessions[0].i=diceAnswers.length;S.sessions[0].a=cur.a}save();launchConfetti();go("finish",false);const sub=document.querySelector("#finish .p");if(sub)sub.textContent=`${list.length} réponse(s) enregistrée(s). Tu peux maintenant les envoyer à ton partenaire.`;const shareBtn=document.querySelector("#finish #diceShareAnswersBtn");if(shareBtn)shareBtn.style.display="block"}
 function launchConfetti(){
  const layer=document.createElement("div");layer.className="en-confetti";
  for(let i=0;i<42;i++){const x=document.createElement("i");x.style.left=(Math.random()*100)+"%";x.style.animationDelay=(Math.random()*.25)+"s";x.style.transform=`rotate(${Math.random()*180}deg)`;layer.appendChild(x)}
  document.body.appendChild(layer);setTimeout(()=>layer.remove(),1900);
 }
+function shareDiceAnswers(){const text=`ENTRE NOUS ❤️\n\nVoici mes réponses au Dé ENTRE NOUS :\n\n${buildDiceAnswersText()}\n\nRéponds-moi à ton tour ❤️`;const code=cur?.inviteCode||S.sessions?.[0]?.inviteCode||EN_GAME?.invite_code;const gameLink=code?EN_APP_URL()+"?invite="+encodeURIComponent(code)+"&exp="+encodeURIComponent("Le dé ENTRE NOUS"):EN_APP_URL();const fullText=text+"\n\nRejoins notre partie ici :\n"+gameLink;if(navigator.share){navigator.share({title:"Mes réponses · Dé ENTRE NOUS",text:fullText}).catch(()=>{})}else{navigator.clipboard?.writeText(fullText);toast("Réponses copiées ❤️")}}
 function finish(){if(S.sessions[0]){S.sessions[0].status="Terminée";S.sessions[0].i=cur.qs.length;S.sessions[0].a=cur.a}save();launchConfetti();go("finish",false)}
 function quit(){if(cur&&S.sessions[0]){S.sessions[0].i=cur.i;S.sessions[0].a=cur.a}save();go("sessions",false)}
 function renderSessions(){sessionList.innerHTML=S.sessions.length?S.sessions.map((s,i)=>`<div class="panel"><span class="badge">${s.status}</span><h3>${s.name}</h3><p class="small">Progression : ${Math.min(s.i||0,(s.diceMode?6:(Q[s.name]||[]).length))} cartes</p><div class="actions"><button class="btn" onclick="resume(${i})">Reprendre</button><button class="btn ghost" onclick="delSession(${i})">Supprimer</button></div></div>`).join(""):`<div class="empty">Aucune partie pour le moment.</div>`}
