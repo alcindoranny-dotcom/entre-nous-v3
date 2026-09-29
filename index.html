@@ -109,6 +109,10 @@ body.light .progress{background:#eee5e9}
 </div>
 <div id="gameBandeFields" class="mode-fields hidden">
 <input id="gameBandeNames" class="input" placeholder="Prénoms / pseudos, séparés par des virgules (3 à 10)">
+<div id="gameDinguerieFields" class="hidden" style="margin-top:9px">
+<input id="gameDinguerieContext" class="input" placeholder="Lieu / contexte de la Dinguerie (ex. plage, maison, soirée...)">
+<p class="small" style="margin-top:6px">🤪 Le contexte servira à personnaliser la variante de la partie.</p>
+</div>
 </div>
 <button class="btn" style="margin-top:12px" type="button" onclick="startSelectedGame()">Commencer le jeu ❤️</button>
 </div>
@@ -574,6 +578,7 @@ function openGame(name){
  if(!canOpenGame(name)){return unlockPremium();}
  EN_SELECTED_GAME=name;
  const label=document.getElementById("selectedGameLabel");if(label)label.innerHTML=`Jeu choisi : <b>${esc(name)}</b> · choisis comment vous voulez jouer.`;
+ const df=document.getElementById("gameDinguerieFields");if(df)df.classList.toggle("hidden",name!=="Dinguerie");
  document.getElementById("gameModePanel")?.scrollIntoView({behavior:"smooth",block:"start"});
  toast(`Jeu choisi : ${name}`);
 }
@@ -582,6 +587,7 @@ function startSelectedGame(){
  if(!name)return toast("Choisis d'abord un jeu.");
  const partner=(document.getElementById("gamePartnerName")?.value||"").trim();
  const players=(document.getElementById("gameBandeNames")?.value||"").split(/[,\n]/).map(x=>x.trim()).filter(Boolean).slice(0,10);
+ const dinguerieContext=(document.getElementById("gameDinguerieContext")?.value||"").trim();
  if(EN_GAME_MODE==="bande" && (players.length<3||players.length>10))return toast("La Bande doit compter de 3 à 10 personnes.");
  if(EN_GAME_MODE==="a2" && !partner)return toast("Ajoute le prénom ou pseudo de l'autre personne.");
  if(EN_GAME_PRESENCE==="distance"){
@@ -589,7 +595,7 @@ function startSelectedGame(){
    const inv=document.getElementById("inviteName");if(inv)inv.value=EN_GAME_MODE==="a2"?partner:players[1]||"";
    go("distance");return;
  }
- startGame(name,{remote:false,partnerName:partner,mode:EN_GAME_MODE,presence:EN_GAME_PRESENCE,players});
+ startGame(name,{remote:false,partnerName:partner,mode:EN_GAME_MODE,presence:EN_GAME_PRESENCE,players,dinguerieContext});
 }
 
 function setExperienceMode(mode){
@@ -639,14 +645,14 @@ if(name==="Défis absurdes"){
  const hard=Q[name]||[];
  if(!opts.challengeLevel){openChallengeChooser();return}
  diceMode=false;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};
- cur={name,qs:(opts.challengeLevel==="hard"?hard:soft).slice(),i:0,a:[],theme:null,challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""};
- S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode:false,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();
+ cur={name,qs:(opts.challengeLevel==="hard"?hard:soft).slice(),i:0,a:[],theme:null,challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||""};
+ S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode:false,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||"",challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();
  trackEvent("game_started",{game:name,remote:!!remoteMode,challengeLevel:opts.challengeLevel});
  go("game");setupGameUI();renderQuestion();return;
 }
 diceMode=name==="Le dé ENTRE NOUS"||opts.dice===true;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};
-let questions=(Q[name]||Q["Se découvrir"]);if(PACK_EXP.has(name)&&!hasPack(name))questions=questions.slice(0,4);cur={name,qs:diceMode?[]:questions,i:0,a:[],theme:null,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""};
-S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();trackEvent("game_started",{game:name,dice:!!diceMode,remote:!!remoteMode});go("game");setupGameUI();
+let questions=(Q[name]||Q["Se découvrir"]);if(PACK_EXP.has(name)&&!hasPack(name))questions=questions.slice(0,4);cur={name,qs:diceMode?[]:questions,i:0,a:[],theme:null,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||""};
+S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||"",inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();trackEvent("game_started",{game:name,dice:!!diceMode,remote:!!remoteMode});go("game");setupGameUI();
 if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes";bar.style.width="0%";answer.value="";return}
 renderQuestion();
 try{await ensureGame(name);await syncProfile()}catch(e){console.error(e);toast("Mode local : synchronisation à vérifier")}
@@ -682,7 +688,7 @@ function enExperienceModeFields(){
  if(window.EN_EXP_PRESENCE==="distance")b.innerHTML+='<p class="small">🌍 À distance · partage possible par WhatsApp.</p>';
 }
 
-function setupGameUI(){const cp=document.getElementById("challengeLevelPanel");if(cp&&(!cur||cur.name!=="Défis absurdes")){cp.classList.add("hidden");cp.innerHTML="";}const pb=document.getElementById("enProfileChoices"),pa=document.getElementById("answer");if(pb&&(!cur||cur.name!=="Quel est ton profil ?"))pb.classList.add("hidden");if(pa)pa.classList.toggle("hidden",!!(cur&&cur.name==="Quel est ton profil ?")||!!(cur&&cur.name==="Défis absurdes"));document.getElementById("dicePanel").classList.toggle("hidden",!diceMode);remoteNote.textContent=remoteMode?"🌍 Partie à distance : chaque question peut être envoyée avec le lien de la partie.":"";playersLine.textContent=(S.profile?.name||remotePartnerName)?`👥 À deux · ${S.profile?.name||"Moi"}${remotePartnerName?` · ${remotePartnerName}`:""}`:"👥 Partie solo"}
+function setupGameUI(){const cp=document.getElementById("challengeLevelPanel");if(cp&&(!cur||cur.name!=="Défis absurdes")){cp.classList.add("hidden");cp.innerHTML="";}const pb=document.getElementById("enProfileChoices"),pa=document.getElementById("answer");if(pb&&(!cur||cur.name!=="Quel est ton profil ?"))pb.classList.add("hidden");if(pa)pa.classList.toggle("hidden",!!(cur&&cur.name==="Quel est ton profil ?")||!!(cur&&cur.name==="Défis absurdes"));document.getElementById("dicePanel").classList.toggle("hidden",!diceMode);remoteNote.textContent=remoteMode?"🌍 Partie à distance : chaque question peut être envoyée avec le lien de la partie.":"";const bande=cur?.mode==="bande"&&Array.isArray(cur?.players)&&cur.players.length;playersLine.textContent=bande?`👥 En bande · ${cur.players.join(" · ")}`:(S.profile?.name||remotePartnerName)?`👥 À deux · ${S.profile?.name||"Moi"}${remotePartnerName?` · ${remotePartnerName}`:""}`:"👤 Partie solo"}
 function rollDice(){
 if(!diceMode)return;
 if(window.__enDiceTimer)clearInterval(window.__enDiceTimer);
@@ -701,6 +707,11 @@ function renderQuestion(){
 const q=cur.qs[cur.i];if(!q)return;
 round.textContent=cur.name==="Défis absurdes"?`🎭 Défis absurdes · ${cur.challengeLevel==="hard"?"🔴 Hard":"🟢 Soft"}`:(cur.theme||cur.name);
 meta.textContent=cur.name==="Défis absurdes"?`Défi ${cur.i+1} sur ${cur.qs.length}`:`Carte ${cur.i+1} sur ${cur.qs.length}`;
+if(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?"){
+ const player=cur.players[(cur.turnIndex||0)%cur.players.length];
+ question.innerHTML=`<div class="small" style="margin-bottom:10px;opacity:.8">🎤 C'est au tour de</div><div style="font-size:1.15em;font-weight:800;margin-bottom:14px">👉 ${esc(player)}</div>`;
+}
+
 if(cur.name==="Qui me connaît ?"){
  question.innerHTML='<div class="small" style="margin-bottom:14px;opacity:.8">À ton avis, quelle serait ma réponse ?</div><div>'+q+'</div>';
 }else{
@@ -721,6 +732,7 @@ bar.style.width=(cur.i/cur.qs.length*100)+"%";
 }
 function markChallenge(done){if(!cur||cur.name!=="Défis absurdes")return;cur.a[cur.i]=done?"Défi réalisé":"Défi non atteint";if(S.sessions[0]){S.sessions[0].a=cur.a;S.sessions[0].challengeLevel=cur.challengeLevel;save();}setTimeout(next,180)}
 function next(){
+if(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?")cur.turnIndex=((cur.turnIndex||0)+1)%cur.players.length;
 cur.i++;
 if(cur.i>=cur.qs.length){if(diceMode){question.textContent="Lance à nouveau le dé pour un autre thème.";answer.value="";bar.style.width="100%";return}finish();return}
 S.sessions[0].i=cur.i;S.sessions[0].a=cur.a;save();renderQuestion()
@@ -736,7 +748,7 @@ function launchConfetti(){
 function finish(){if(S.sessions[0]){S.sessions[0].status="Terminée";S.sessions[0].i=cur.qs.length;S.sessions[0].a=cur.a}save();launchConfetti();go("finish",false)}
 function quit(){if(cur&&S.sessions[0]){S.sessions[0].i=cur.i;S.sessions[0].a=cur.a}save();go("sessions",false)}
 function renderSessions(){sessionList.innerHTML=S.sessions.length?S.sessions.map((s,i)=>`<div class="panel"><span class="badge">${s.status}</span><h3>${s.name}</h3><p class="small">Progression : ${Math.min(s.i||0,(s.diceMode?6:(Q[s.name]||[]).length))} cartes</p><div class="actions"><button class="btn" onclick="resume(${i})">Reprendre</button><button class="btn ghost" onclick="delSession(${i})">Supprimer</button></div></div>`).join(""):`<div class="empty">Aucune partie pour le moment.</div>`}
-function resume(i){const s=S.sessions[i];let questions=(Q[s.name]||Q["Se découvrir"]);if(PACK_EXP.has(s.name)&&!hasPack(s.name))questions=questions.slice(0,4);cur={name:s.name,qs:s.diceMode?[]:(s.name==="Défis absurdes"?(s.challengeLevel==="hard"?(Q[s.name]||[]):["Mange une petite bouchée de citron avec une pincée de sel.","Cours 10 mètres en faisant une démarche complètement ridicule.","Marche 10 pas les yeux fermés, guidé(e) par quelqu’un.","Fais une imitation pendant 30 secondes.","Danse sans musique pendant 20 secondes.","Fais deviner un objet sans parler.","Fais le tour de la pièce en marchant comme un pingouin.","Chante le refrain d’une chanson avec une voix ridicule."]):questions),i:s.i||0,a:s.a||[],theme:s.theme||null,challengeLevel:s.challengeLevel||null,inviteCode:s.inviteCode||""};diceMode=!!s.diceMode;remoteMode=!!s.remoteMode;remotePartnerName=s.partnerName||"";go("game");setupGameUI();if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes"}else renderQuestion()}
+function resume(i){const s=S.sessions[i];let questions=(Q[s.name]||Q["Se découvrir"]);if(PACK_EXP.has(s.name)&&!hasPack(s.name))questions=questions.slice(0,4);cur={name:s.name,qs:s.diceMode?[]:(s.name==="Défis absurdes"?(s.challengeLevel==="hard"?(Q[s.name]||[]):["Mange une petite bouchée de citron avec une pincée de sel.","Cours 10 mètres en faisant une démarche complètement ridicule.","Marche 10 pas les yeux fermés, guidé(e) par quelqu’un.","Fais une imitation pendant 30 secondes.","Danse sans musique pendant 20 secondes.","Fais deviner un objet sans parler.","Fais le tour de la pièce en marchant comme un pingouin.","Chante le refrain d’une chanson avec une voix ridicule."]):questions),i:s.i||0,a:s.a||[],theme:s.theme||null,challengeLevel:s.challengeLevel||null,inviteCode:s.inviteCode||"",mode:s.mode||"a2",presence:s.presence||"presentiel",players:s.players||[],turnIndex:s.turnIndex||0,dinguerieContext:s.dinguerieContext||""};diceMode=!!s.diceMode;remoteMode=!!s.remoteMode;remotePartnerName=s.partnerName||"";go("game");setupGameUI();if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes"}else renderQuestion()}
 function delSession(i){S.sessions.splice(i,1);save();renderSessions()}
 function resumePartner(index){
  const p=S.partners[index];
