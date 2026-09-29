@@ -735,11 +735,14 @@ function qmkGuesserOrder(){
 function qmkCurrentGuesser(){return qmkGuesserOrder()[cur.qmkGuesserIndex||0]}
 function qmkRenderShell(html){
   question.innerHTML=html;answer.value='';
-  const generic=document.getElementById('gameActions');
-  if(generic)generic.classList.add('hidden');
+  document.querySelectorAll("#game .actions,.actions").forEach(el=>el.classList.add("hidden"));
+  const memoryBtn=document.querySelector('#game button[onclick="openMemory()"]');
+  if(memoryBtn)memoryBtn.classList.add("hidden");
   let box=document.getElementById('qmkActions');
   if(!box){box=document.createElement('div');box.id='qmkActions';box.className='card';question.parentNode.insertBefore(box,question.nextSibling)}
   box.innerHTML='';box.classList.remove('hidden');
+  const inputPhase=cur?.qmkPhase==="targetAnswer"||cur?.qmkPhase==="guessers";
+  answer.classList.toggle("hidden",!inputPhase);
 }
 function qmkChooseQuestion(i){
   if(cur.qmkPhase!=='chooseQuestion')return;
@@ -808,7 +811,9 @@ function renderQuiMeConnaitBande(){
 }
 
 function renderQuestion(){
-answer?.classList.remove("hidden");document.querySelector("#game")?.querySelectorAll(".actions").forEach(el=>el.classList.remove("hidden"));
+answer?.classList.remove("hidden");document.querySelectorAll("#game .actions,.actions").forEach(el=>el.classList.remove("hidden"));
+const memoryBtn=document.querySelector('#game button[onclick="openMemory()"]');
+if(memoryBtn)memoryBtn.classList.remove("hidden");
 if(cur?.name==="Qui me connaît ?" && cur?.mode==="bande" && cur?.presence==="presentiel"){renderQuiMeConnaitBande();return;}
 const q=cur.qs[cur.i];if(!q)return;
 round.textContent=cur.name==="Défis absurdes"?`🎭 Défis absurdes · ${cur.challengeLevel==="hard"?"🔴 Hard":"🟢 Soft"}`:(cur.theme||cur.name);
