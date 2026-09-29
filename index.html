@@ -537,9 +537,41 @@ function handleMomentPhoto(e){const f=e.target.files?.[0];if(!f)return;if(!f.typ
 function cancelMomentPhoto(){window.__enMomentPhoto=null;const i=document.getElementById("momentPhotoInput");if(i)i.value="";document.getElementById("momentPhotoPreview").innerHTML=""}
 function saveMomentPhoto(){const data=window.__enMomentPhoto;if(!data)return;try{S.memories.unshift({date:new Date().toLocaleDateString("fr-FR"),note:"Photo conservée dans Mes moments ❤️",experience:cur?.name||"ENTRE NOUS",photo:data});if(S.memories.length>12)S.memories=S.memories.slice(0,12);save();window.__enMomentPhoto=null;document.getElementById("momentPhotoInput").value="";document.getElementById("momentPhotoPreview").innerHTML="";renderProfile();toast("Photo gardée dans Mes moments ❤️")}catch(e){console.error(e);toast("Impossible de conserver cette photo ici. Essaie une photo plus légère.")}}
 function backToGame(){if(cur){go("game",false);setupGameUI();if(diceMode&&!cur.qs.length){question.textContent="Lance le dé pour choisir un thème."}else renderQuestion() }else go("play",false)}
-function go(id,p=true){const a=document.querySelector(".screen.active");if(a&&a.id!==id&&p)hist.push(a.id);document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.n===id));const br=document.getElementById("enBottomReturn");if(br)br.classList.toggle("show",id!=="home");if(id==="sessions")renderSessions();if(id==="profile")renderProfile();trackEvent("screen_view",{screen:id});window.scrollTo(0,0)}
+function enRenderScreen(id){
+ const target=document.getElementById(id)||document.getElementById("home");
+ if(!target)return;
+ document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+ target.classList.add("active");
+ document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.n===target.id));
+ const br=document.getElementById("enBottomReturn");if(br)br.classList.toggle("show",target.id!=="home");
+ if(target.id==="sessions")renderSessions();
+ if(target.id==="profile")renderProfile();
+ trackEvent("screen_view",{screen:target.id});
+ window.scrollTo(0,0);
+}
+function go(id,p=true){
+ const a=document.querySelector(".screen.active");
+ if(a&&a.id===id)return;
+ try{
+  const state={enApp:true,enScreen:id};
+  if(p)history.pushState(state,"",location.href);
+  else history.replaceState(state,"",location.href);
+ }catch(e){console.warn("Navigation history indisponible",e)}
+ enRenderScreen(id);
+}
 function enBottomBack(){const active=document.querySelector(".screen.active")?.id;if(active==="game"){quit();}else{goBackTo("home");}}
-function goBackTo(fallback="home"){const target=hist.length?hist.pop():fallback;go(target,false)}
+function goBackTo(fallback="home"){
+ if(history.state?.enApp && history.length>1){history.back();return;}
+ const target=hist.length?hist.pop():fallback;
+ go(target,false);
+}
+window.addEventListener("popstate",()=>{
+ const target=history.state?.enApp?history.state.enScreen:"home";
+ enRenderScreen(target||"home");
+});
+if(!history.state?.enApp){
+ try{history.replaceState({enApp:true,enScreen:document.querySelector(".screen.active")?.id||"home"},"",location.href)}catch(e){console.warn("Initialisation historique indisponible",e)}
+}
 function esc(s){return String(s).replace(/'/g,"\\\\'")}
 
 function hasPremium(){return isDemoMode() || !!S.premium || !!S.profile?.premium}
