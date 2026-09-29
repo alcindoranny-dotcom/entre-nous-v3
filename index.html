@@ -418,7 +418,18 @@ const Q={
 "Libertin":["Quelles règles rendent l'expérience sereine pour toi ?","Qu'est-ce qui doit rester entre nous ?","Comment parler des limites avant une expérience ?","Qu'est-ce qui te donne confiance ?","Qu'est-ce que la liberté signifie pour toi dans une relation ?","Quelles seraient tes limites absolues avec d'autres partenaires ?","Quelles règles aimerais-tu que nous établissions ensemble ?","Quelles situations seraient pour toi acceptables, et lesquelles ne le seraient pas ?","Y a-t-il des personnes ou des contextes que tu souhaiterais exclure ?","Souhaites-tu être informé(e) des rencontres de l'autre ou préfères-tu garder certains détails privés ?","Comment réagis-tu naturellement face à la jalousie ?","De quoi aurais-tu besoin pour te sentir rassuré(e) ?","Comment préserver notre complicité de couple ?","Comment éviter qu'une relation extérieure prenne trop de place ?","Que ferions-nous si l'un de nous développait des sentiments ?","Comment réagirions-nous si l'un de nous décidait finalement d'arrêter ?","Comment annoncer une situation qui pourrait être difficile à entendre ?","Préférerais-tu parler immédiatement d'un problème ou prendre du recul ?","Quelles informations doivent absolument être partagées entre nous ?","Comment vérifier régulièrement que nous sommes toujours tous les deux à l'aise ?"],
 "10 ans ou plus":["Qu'est-ce que tu admires encore chez moi après toutes ces années ?","Quel souvenir de notre histoire voudrais-tu garder ?","Qu'avons-nous appris ensemble ?","Qu'aimerais-tu réinventer aujourd'hui ?","Quel moment de notre histoire te fait encore sourire ?","Quelle qualité chez moi as-tu appris à apprécier davantage avec le temps ?","Qu'est-ce qui nous a permis de traverser les périodes difficiles ?","Quelle étape de notre histoire t'a le plus marqué(e) ?","Qu'est-ce qui a le plus changé entre nous au fil des années ?","Qu'est-ce que tu penses que nous avons mieux compris l'un de l'autre avec le temps ?","Quelle habitude aimerais-tu que nous conservions encore longtemps ?","Quelle habitude aimerais-tu que nous changions ou renouvelions ?","De quoi es-tu le plus fier/fière lorsque tu regardes notre parcours ?","Quel souvenir aimerais-tu absolument revivre avec moi ?","Qu'aimerais-tu que nous découvrions encore ensemble ?","Comment imagines-tu notre relation dans dix nouvelles années ?","Quelle promesse aimerais-tu que nous nous fassions pour la suite ?","Qu'est-ce que tu voudrais ne jamais perdre entre nous ?","Quelle nouvelle aventure aimerais-tu commencer ensemble ?","Après toutes ces années, qu'aimerais-tu encore apprendre sur moi ?"]
 };
-Q["Qui me connaît ?"]=["Quelle personne te connaît le mieux ?","Quel détail chez toi quelqu’un qui te connaît bien remarquerait immédiatement ?","Quelle habitude les personnes proches de toi pourraient deviner ?","Quelle serait la réponse de la personne qui te connaît le mieux à cette question ?","Quel souvenir de toi serait facile à reconnaître pour un proche ?","Quelle petite manie pourrait te trahir ?","Qu’est-ce que tes proches savent presque toujours quand tu vas mal ?","Quelle qualité les personnes qui te connaissent bien te reconnaissent-elles ?","Quelle décision récente quelqu’un qui te connaît bien aurait-il pu prévoir ?","Qu’est-ce qu’une personne proche comprend de toi sans que tu aies besoin de l’expliquer ?"];
+Q["Qui me connaît ?"]=[
+"Quel est mon plat préféré ?",
+"Qu’est-ce qui me met instantanément de bonne humeur ?",
+"Qu’est-ce qui m’énerve le plus ?",
+"Quelle est ma plus grande peur ?",
+"Quelle destination me ferait le plus rêver ?",
+"Quelle petite habitude ou manie ai-je souvent ?",
+"Quand je suis de mauvaise humeur, qu’est-ce que je fais généralement ?",
+"Quel cadeau me ferait vraiment plaisir ?",
+"Si j’avais une journée entièrement libre, qu’est-ce que je choisirais de faire ?",
+"Quelle qualité est-ce que je recherche le plus chez une personne proche ?"
+];
 Q["Bande"]=["Qui dans le groupe serait le premier à proposer une idée folle ?","Qui connaît le mieux les habitudes des autres ?","Quel souvenir de bande mérite clairement d’être raconté ?","Quelle activité ferait rire tout le monde ?","Qui serait le meilleur organisateur d’une sortie ?","Quel défi léger pourriez-vous relever ensemble ?","Si votre bande avait un slogan, lequel serait-il ?","Quel moment aimeriez-vous créer tous ensemble cette année ?"];
 
 
@@ -690,7 +701,12 @@ function renderQuestion(){
 const q=cur.qs[cur.i];if(!q)return;
 round.textContent=cur.name==="Défis absurdes"?`🎭 Défis absurdes · ${cur.challengeLevel==="hard"?"🔴 Hard":"🟢 Soft"}`:(cur.theme||cur.name);
 meta.textContent=cur.name==="Défis absurdes"?`Défi ${cur.i+1} sur ${cur.qs.length}`:`Carte ${cur.i+1} sur ${cur.qs.length}`;
-question.textContent=q;question.classList.remove("challenge-stage");
+if(cur.name==="Qui me connaît ?"){
+ question.innerHTML='<div class="small" style="margin-bottom:14px;opacity:.8">À ton avis, quelle serait ma réponse ?</div><div>'+q+'</div>';
+}else{
+ question.textContent=q;
+}
+question.classList.remove("challenge-stage");
 if(cur.name==="Défis absurdes"){
  answer.classList.add("hidden");
  let ca=document.getElementById("challengeActions");
