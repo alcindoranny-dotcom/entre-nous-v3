@@ -560,7 +560,7 @@ function canOpenGame(name){return FREE_GAMES.has(name)||hasPremium()}
 function canOpenExperience(name){return name==="Se découvrir" || (PREMIUM_EXP.has(name)?hasPremium():PACK_EXP.has(name)?hasPack(name):true)}
 function renderCards(){gameCards.innerHTML=GAMES.map(g=>{const locked=!canOpenGame(g[1]);return `<div class="card" onclick="openGame('${esc(g[1])}')"><div style="font-size:28px">${g[0]}</div><h3>${g[1]} ${locked?"🔒":""}</h3><p>${g[2]}</p></div>`}).join("");experienceCards.innerHTML=EXP.map(e=>{const locked=!canOpenExperience(e[1]);const action=locked?(PREMIUM_EXP.has(e[1])?`unlockPremium()`:`unlockPack('${esc(e[1])}')`):`openExperience('${esc(e[1])}')`;return `<div class="card" onclick="${action}"><div style="font-size:28px">${e[0]}</div><h3>${e[1]} ${locked?"🔒":""}</h3><p>${e[2]}</p></div>`}).join("")}
 let EN_EXP_MODE="a2",EN_EXP_PRESENCE="presentiel";
-let EN_GAME_MODE="a2",EN_GAME_PRESENCE="presentiel",EN_SELECTED_GAME="";
+let EN_GAME_MODE="a2",EN_GAME_PRESENCE="presentiel",EN_SELECTED_GAME="";let EN_PENDING_CHALLENGE_OPTS=null;
 
 function setGameMode(mode){
  EN_GAME_MODE=mode;
@@ -595,6 +595,7 @@ function startSelectedGame(){
    const inv=document.getElementById("inviteName");if(inv)inv.value=EN_GAME_MODE==="a2"?partner:players[1]||"";
    go("distance");return;
  }
+ if(name==="Défis absurdes"){EN_PENDING_CHALLENGE_OPTS={remote:false,partnerName:partner,mode:EN_GAME_MODE,presence:EN_GAME_PRESENCE,players,dinguerieContext};}
  startGame(name,{remote:false,partnerName:partner,mode:EN_GAME_MODE,presence:EN_GAME_PRESENCE,players,dinguerieContext});
 }
 
@@ -645,8 +646,8 @@ if(name==="Défis absurdes"){
  const hard=Q[name]||[];
  if(!opts.challengeLevel){openChallengeChooser();return}
  diceMode=false;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};
- cur={name,qs:(opts.challengeLevel==="hard"?hard:soft).slice(),i:0,a:[],theme:null,challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||"",qmkPhase:(opts.mode==="bande"&&name==="Qui me connaît ?"&&opts.presence==="presentiel")?"chooseQuestion":null,qmkTargetOrder:null,qmkRound:0,qmkTargetIndex:null,qmkQuestionIndex:null,qmkTargetAnswer:"",qmkGuesserIndex:0,qmkGuesserAnswers:{}};
- S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode:false,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||"",qmkPhase:null,qmkTargetOrder:null,qmkRound:0,qmkTargetIndex:null,qmkQuestionIndex:null,qmkTargetAnswer:"",qmkGuesserIndex:0,qmkGuesserAnswers:{},challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();
+ const challengeOrder=(opts.mode==="bande"&&Array.isArray(opts.players)&&opts.players.length)?qmkShuffle(opts.players.map((_,i)=>i)):[];cur={name,qs:(opts.challengeLevel==="hard"?hard:soft).slice(),i:0,a:[],theme:null,challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,challengePlayerOrder:challengeOrder,challengeTurnIndex:0,dinguerieContext:opts.dinguerieContext||"",qmkPhase:(opts.mode==="bande"&&name==="Qui me connaît ?"&&opts.presence==="presentiel")?"chooseQuestion":null,qmkTargetOrder:null,qmkRound:0,qmkTargetIndex:null,qmkQuestionIndex:null,qmkTargetAnswer:"",qmkGuesserIndex:0,qmkGuesserAnswers:{}};
+ S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode:false,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,challengePlayerOrder:challengeOrder,challengeTurnIndex:0,dinguerieContext:opts.dinguerieContext||"",qmkPhase:null,qmkTargetOrder:null,qmkRound:0,qmkTargetIndex:null,qmkQuestionIndex:null,qmkTargetAnswer:"",qmkGuesserIndex:0,qmkGuesserAnswers:{},challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();
  trackEvent("game_started",{game:name,remote:!!remoteMode,challengeLevel:opts.challengeLevel});
  go("game");setupGameUI();renderQuestion();return;
 }
@@ -660,7 +661,7 @@ try{await ensureGame(name);await syncProfile()}catch(e){console.error(e);toast("
 
 function openChallengeChooser(){const m=document.getElementById("challengeChooser");if(m){m.classList.add("show");m.setAttribute("aria-hidden","false")}}
 function closeChallengeChooser(){const m=document.getElementById("challengeChooser");if(m){m.classList.remove("show");m.setAttribute("aria-hidden","true")}}
-function confirmChallengeLevel(level){closeChallengeChooser();startGame("Défis absurdes",{challengeLevel:level,remote:false,mode:"a2",presence:"presentiel"})}
+function confirmChallengeLevel(level){const base=EN_PENDING_CHALLENGE_OPTS||{remote:false,mode:"a2",presence:"presentiel",players:[]};EN_PENDING_CHALLENGE_OPTS=null;closeChallengeChooser();startGame("Défis absurdes",{...base,challengeLevel:level})}
 function chooseChallengeLevel(level,el){
  if(!cur||cur.name!=="Défis absurdes")return;
  const soft=["Mange une petite bouchée de citron avec une pincée de sel.","Cours 10 mètres en faisant une démarche complètement ridicule.","Marche 10 pas les yeux fermés, guidé(e) par quelqu’un.","Fais une imitation pendant 30 secondes.","Danse sans musique pendant 20 secondes.","Fais deviner un objet sans parler.","Fais le tour de la pièce en marchant comme un pingouin.","Chante le refrain d’une chanson avec une voix ridicule."];
@@ -818,10 +819,13 @@ if(cur?.name==="Qui me connaît ?" && cur?.mode==="bande" && cur?.presence==="pr
 const q=cur.qs[cur.i];if(!q)return;
 round.textContent=cur.name==="Défis absurdes"?`🎭 Défis absurdes · ${cur.challengeLevel==="hard"?"🔴 Hard":"🟢 Soft"}`:(cur.theme||cur.name);
 meta.textContent=cur.name==="Défis absurdes"?`Défi ${cur.i+1} sur ${cur.qs.length}`:`Carte ${cur.i+1} sur ${cur.qs.length}`;
-const bandePlayer=(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?")?cur.players[(cur.turnIndex||0)%cur.players.length]:"";
+const challengePlayer=(cur.name==="Défis absurdes"&&cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&Array.isArray(cur.challengePlayerOrder)&&cur.challengePlayerOrder.length)?cur.players[cur.challengePlayerOrder[cur.challengeTurnIndex||0]]:"";
+const bandePlayer=(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?"&&cur.name!=="Défis absurdes")?cur.players[(cur.turnIndex||0)%cur.players.length]:"";
 
 if(cur.name==="Qui me connaît ?"){
  question.innerHTML='<div class="small" style="margin-bottom:14px;opacity:.8">À ton avis, quelle serait ma réponse ?</div><div>'+q+'</div>';
+}else if(challengePlayer){
+ question.innerHTML='<div class="small" style="margin-bottom:10px;opacity:.8">🎯 Défi désigné pour</div><div style="font-size:1.15em;font-weight:800;margin-bottom:14px">👉 '+esc(challengePlayer)+'</div><div>'+q+'</div>';
 }else if(bandePlayer){
  question.innerHTML='<div class="small" style="margin-bottom:10px;opacity:.8">🎤 C’est au tour de</div><div style="font-size:1.15em;font-weight:800;margin-bottom:14px">👉 '+esc(bandePlayer)+'</div><div>'+q+'</div>';
 }else{
@@ -842,10 +846,14 @@ bar.style.width=(cur.i/cur.qs.length*100)+"%";
 }
 function markChallenge(done){if(!cur||cur.name!=="Défis absurdes")return;cur.a[cur.i]=done?"Défi réalisé":"Défi non atteint";if(S.sessions[0]){S.sessions[0].a=cur.a;S.sessions[0].challengeLevel=cur.challengeLevel;save();}setTimeout(next,180)}
 function next(){
-if(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?")cur.turnIndex=((cur.turnIndex||0)+1)%cur.players.length;
+if(cur.name==="Défis absurdes"&&cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length){
+ cur.challengeTurnIndex=((cur.challengeTurnIndex||0)+1)%(cur.challengePlayerOrder?.length||cur.players.length);
+}else if(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?"){
+ cur.turnIndex=((cur.turnIndex||0)+1)%cur.players.length;
+}
 cur.i++;
 if(cur.i>=cur.qs.length){if(diceMode){question.textContent="Lance à nouveau le dé pour un autre thème.";answer.value="";bar.style.width="100%";return}finish();return}
-S.sessions[0].i=cur.i;S.sessions[0].a=cur.a;S.sessions[0].turnIndex=cur.turnIndex||0;save();renderQuestion()
+S.sessions[0].i=cur.i;S.sessions[0].a=cur.a;S.sessions[0].turnIndex=cur.turnIndex||0;S.sessions[0].challengePlayerOrder=cur.challengePlayerOrder||[];S.sessions[0].challengeTurnIndex=cur.challengeTurnIndex||0;save();renderQuestion()
 }
 async function saveAnswer(){cur.a[cur.i]=answer.value.trim();try{await saveAnswerRemote(cur.i,cur.qs[cur.i],cur.a[cur.i],false)}catch(e){console.error(e)}S.sessions[0].a=cur.a;save();next()}
 async function skip(){cur.a[cur.i]="";try{await saveAnswerRemote(cur.i,cur.qs[cur.i],null,false)}catch(e){console.error(e)}S.sessions[0].skipped=(S.sessions[0].skipped||[]).concat(cur.i);save();next()}
@@ -858,7 +866,7 @@ function launchConfetti(){
 function finish(){if(S.sessions[0]){S.sessions[0].status="Terminée";S.sessions[0].i=cur.qs.length;S.sessions[0].a=cur.a}save();launchConfetti();go("finish",false)}
 function quit(){if(cur&&S.sessions[0]){S.sessions[0].i=cur.i;S.sessions[0].a=cur.a}save();go("sessions",false)}
 function renderSessions(){sessionList.innerHTML=S.sessions.length?S.sessions.map((s,i)=>`<div class="panel"><span class="badge">${s.status}</span><h3>${s.name}</h3><p class="small">Progression : ${Math.min(s.i||0,(s.diceMode?6:(Q[s.name]||[]).length))} cartes</p><div class="actions"><button class="btn" onclick="resume(${i})">Reprendre</button><button class="btn ghost" onclick="delSession(${i})">Supprimer</button></div></div>`).join(""):`<div class="empty">Aucune partie pour le moment.</div>`}
-function resume(i){const s=S.sessions[i];let questions=(Q[s.name]||Q["Se découvrir"]);if(PACK_EXP.has(s.name)&&!hasPack(s.name))questions=questions.slice(0,4);cur={name:s.name,qs:s.diceMode?[]:(s.name==="Défis absurdes"?(s.challengeLevel==="hard"?(Q[s.name]||[]):["Mange une petite bouchée de citron avec une pincée de sel.","Cours 10 mètres en faisant une démarche complètement ridicule.","Marche 10 pas les yeux fermés, guidé(e) par quelqu’un.","Fais une imitation pendant 30 secondes.","Danse sans musique pendant 20 secondes.","Fais deviner un objet sans parler.","Fais le tour de la pièce en marchant comme un pingouin.","Chante le refrain d’une chanson avec une voix ridicule."]):questions),i:s.i||0,a:s.a||[],theme:s.theme||null,challengeLevel:s.challengeLevel||null,inviteCode:s.inviteCode||"",mode:s.mode||"a2",presence:s.presence||"presentiel",players:s.players||[],turnIndex:s.turnIndex||0,dinguerieContext:s.dinguerieContext||"",qmkPhase:s.qmkPhase||null,qmkTargetOrder:s.qmkTargetOrder||null,qmkRound:s.qmkRound||0,qmkTargetIndex:s.qmkTargetIndex??null,qmkQuestionIndex:s.qmkQuestionIndex??null,qmkTargetAnswer:s.qmkTargetAnswer||"",qmkGuesserIndex:s.qmkGuesserIndex||0,qmkGuesserAnswers:s.qmkGuesserAnswers||{},qmkRevealed:!!s.qmkRevealed};diceMode=!!s.diceMode;remoteMode=!!s.remoteMode;remotePartnerName=s.partnerName||"";go("game");setupGameUI();if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes"}else renderQuestion()}
+function resume(i){const s=S.sessions[i];let questions=(Q[s.name]||Q["Se découvrir"]);if(PACK_EXP.has(s.name)&&!hasPack(s.name))questions=questions.slice(0,4);cur={name:s.name,qs:s.diceMode?[]:(s.name==="Défis absurdes"?(s.challengeLevel==="hard"?(Q[s.name]||[]):["Mange une petite bouchée de citron avec une pincée de sel.","Cours 10 mètres en faisant une démarche complètement ridicule.","Marche 10 pas les yeux fermés, guidé(e) par quelqu’un.","Fais une imitation pendant 30 secondes.","Danse sans musique pendant 20 secondes.","Fais deviner un objet sans parler.","Fais le tour de la pièce en marchant comme un pingouin.","Chante le refrain d’une chanson avec une voix ridicule."]):questions),i:s.i||0,a:s.a||[],theme:s.theme||null,challengeLevel:s.challengeLevel||null,inviteCode:s.inviteCode||"",mode:s.mode||"a2",presence:s.presence||"presentiel",players:s.players||[],turnIndex:s.turnIndex||0,challengePlayerOrder:Array.isArray(s.challengePlayerOrder)?s.challengePlayerOrder:((s.mode==="bande"&&s.name==="Défis absurdes"&&Array.isArray(s.players))?s.players.map((_,i)=>i):[]),challengeTurnIndex:s.challengeTurnIndex||0,dinguerieContext:s.dinguerieContext||"",qmkPhase:s.qmkPhase||null,qmkTargetOrder:s.qmkTargetOrder||null,qmkRound:s.qmkRound||0,qmkTargetIndex:s.qmkTargetIndex??null,qmkQuestionIndex:s.qmkQuestionIndex??null,qmkTargetAnswer:s.qmkTargetAnswer||"",qmkGuesserIndex:s.qmkGuesserIndex||0,qmkGuesserAnswers:s.qmkGuesserAnswers||{},qmkRevealed:!!s.qmkRevealed};diceMode=!!s.diceMode;remoteMode=!!s.remoteMode;remotePartnerName=s.partnerName||"";go("game");setupGameUI();if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes"}else renderQuestion()}
 function delSession(i){S.sessions.splice(i,1);save();renderSessions()}
 function resumePartner(index){
  const p=S.partners[index];
