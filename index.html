@@ -163,7 +163,7 @@ body.light .progress{background:#eee5e9}
 <section id="sessions" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button><div class="hero"><div class="eyebrow">Mes parties</div><h1>Reprendre.</h1><div id="sessionList"></div></div></section>
 
 <section id="distance" class="screen"><button class="back btn ghost" onclick="go('experience')">← Expérience</button><div class="hero"><div class="eyebrow">À distance</div><h1>Partager une partie.</h1>
-<div class="panel"><b>Créer une invitation</b><input id="inviteName" class="input" placeholder="Prénom / pseudo de la personne invitée"><input id="inviteEmail" class="input" type="text" autocomplete="off" placeholder="E-mail ou numéro de téléphone de la personne invitée" style="margin-top:9px"><label class="small" style="display:block;margin:12px 0 7px">🎮 Que veux-tu lui envoyer ?</label><select id="inviteExp" class="input"><optgroup label="✨ Expériences"><option>Se découvrir</option><option>Complicité</option><option>Amitié</option><option>Amour</option><option>Bande</option><option>Je te connais… tu aurais répondu ça !</option><option>Nos liens de fraternité</option><option>Parent &amp; Enfant</option><option>Piment</option><option>Couple</option><option>Sexfriend</option><option>Libertin</option><option>10 ans ou plus</option></optgroup><optgroup label="🎲 Jeux"><option>Le dé ENTRE NOUS</option><option>Qui me connaît ?</option><option>Apéro</option><option>Dinguerie</option><option>Souvenirs</option><option>Notre prochain projet</option><option>Quel est ton profil ?</option><option>Défis absurdes</option></optgroup></select><button class="btn" onclick="createInvite()">Créer l'invitation ❤️</button><p class="small">La personne recevra un <b>lien cliquable + son code personnel à 6 chiffres</b>. Le même code sera conservé pour ses prochaines invitations.</p><div id="inviteOut"></div></div>
+<div class="panel"><b>Créer une invitation</b><input id="inviteName" class="input" placeholder="Prénom / pseudo de la personne invitée"><label class="small" style="display:block;margin:12px 0 7px">🎮 Que veux-tu lui envoyer ?</label><select id="inviteExp" class="input"><optgroup label="✨ Expériences"><option>Se découvrir</option><option>Complicité</option><option>Amitié</option><option>Amour</option><option>Bande</option><option>Je te connais… tu aurais répondu ça !</option><option>Nos liens de fraternité</option><option>Parent &amp; Enfant</option><option>Piment</option><option>Couple</option><option>Sexfriend</option><option>Libertin</option><option>10 ans ou plus</option></optgroup><optgroup label="🎲 Jeux"><option>Le dé ENTRE NOUS</option><option>Qui me connaît ?</option><option>Apéro</option><option>Dinguerie</option><option>Souvenirs</option><option>Notre prochain projet</option><option>Quel est ton profil ?</option><option>Défis absurdes</option></optgroup></select><button class="btn" onclick="createInvite()">📤 Partager l’invitation ❤️</button><p class="small">Le téléphone te proposera WhatsApp, SMS, e-mail et les autres applications de partage disponibles.</p><div id="inviteOut"></div></div>
 <div class="panel"><b>Rejoindre</b><input id="joinCode" class="input" placeholder="Code d'invitation"><button class="btn ghost" onclick="joinInvite()">Rejoindre la partie</button></div></div></section>
 
 <section id="profile" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button><div class="hero"><div class="eyebrow">Profil</div><h1>Mon espace.</h1>
@@ -898,18 +898,16 @@ async function hashInviteToken(token){
  const bytes=new TextEncoder().encode(token);const hash=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 function randomInviteToken(){const bytes=new Uint8Array(32);crypto.getRandomValues(bytes);return btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
-function normalizeInviteContact(value){return String(value||'').trim().toLowerCase()}
 async function createInvite(){
- const name=inviteName.value.trim(),contact=normalizeInviteContact(inviteEmail.value),exp=inviteExp.value;
+ const name=inviteName.value.trim(),exp=inviteExp.value;
  const isExp=EXP.some(e=>e[1]===exp);
  if(isExp && !canOpenExperience(exp))return PACK_EXP.has(exp)?unlockPack(exp):unlockPremium();
  if(!isExp && !canOpenGame(exp))return unlockPremium();
  if(!name)return toast('Indique le prénom ou pseudo de la personne invitée.');
- if(!contact)return toast('Indique l’e-mail ou le numéro de téléphone de la personne invitée.');
  try{
    const game=await ensureGame(exp);const token=randomInviteToken();const tokenHash=await hashInviteToken(token);
    const expiresAt=new Date(Date.now()+7*24*60*60*1000).toISOString();
-   const {data,error}=await sb.rpc('create_private_invitation',{p_game_id:game.id,p_invitee_name:name,p_invitee_email:contact,p_token_hash:tokenHash,p_expires_at:expiresAt});
+   const {data,error}=await sb.rpc('create_private_invitation',{p_game_id:game.id,p_invitee_name:name,p_invitee_email:null,p_token_hash:tokenHash,p_expires_at:expiresAt});
    if(error)throw error;
    const inv=Array.isArray(data)?data[0]:data;const code=game.invite_code;const partnerCode=inv?.partner_code||'';
    const url=EN_APP_URL()+'?invite='+encodeURIComponent(token);
@@ -918,8 +916,9 @@ async function createInvite(){
    const existingSession=S.sessions.find(x=>x.remoteMode&&x.partnerName===name&&x.name===exp&&x.inviteCode===code);
    if(!existingSession)S.sessions.unshift({name:exp,status:'En cours',i:0,a:[],created:new Date().toISOString(),diceMode:exp==='Le dé ENTRE NOUS',remoteMode:true,partnerName:name,mode:'a2',presence:'distance',players:[S.profile?.name||'Moi',name],inviteCode:code});
    S.sessions=S.sessions.slice(0,30);save();renderProfile();
-   inviteOut.innerHTML=`<div class="panel"><span class="badge">🔒 Invitation privée</span><div class="remote">${esc(name)}</div><p class="small">🎮 ${esc(exp)}</p><div class="panel" style="margin:12px 0;text-align:center"><div class="small">🔐 Code personnel de ${esc(name)}</div><strong style="font-size:28px;letter-spacing:5px">${esc(partnerCode)}</strong><p class="fine">Ce code restera le même pour les prochaines invitations de cette personne.</p></div><div class="small" style="word-break:break-all;margin-bottom:10px">${url}</div><div class="actions"><button class="btn" onclick="launchRemoteCreatedGame('${code}')">▶️ Lancer la partie ❤️</button></div><div class="actions" style="margin-top:9px"><button class="btn wa" onclick="shareInvite('${code}','wa')">📱 WhatsApp</button><button class="btn ghost" onclick="shareInvite('${code}','sms')">💬 SMS</button><button class="btn ghost" onclick="shareInvite('${code}','mail')">📧 E-mail</button><button class="btn ghost" onclick="shareInvite('${code}','copy')">📋 Copier</button></div></div>`;
-   toast('Invitation privée créée 🔒❤️');
+   inviteOut.innerHTML=`<div class="panel"><span class="badge">🔒 Invitation privée</span><div class="remote">${esc(name)}</div><p class="small">🎮 ${esc(exp)}</p><div class="panel" style="margin:12px 0;text-align:center"><div class="small">🔐 Code personnel de ${esc(name)}</div><strong style="font-size:28px;letter-spacing:5px">${esc(partnerCode)}</strong><p class="fine">Ce code restera le même pour les prochaines invitations de cette personne.</p></div><button class="btn" onclick="shareInvite('${code}')">📤 Partager l’invitation</button></div>`;
+   await shareInvite(code);
+   toast('Invitation prête à partager 🔒❤️');
  }catch(e){console.error('Création invitation privée:',e);const msg=e?.message||e?.details||e?.hint||'Erreur inconnue';toast('Impossible de créer l’invitation privée : '+msg); }
 }
 function launchRemoteCreatedGame(code){
@@ -929,16 +928,16 @@ function launchRemoteCreatedGame(code){
  remotePartnerName=p.name||'';
  startGame(exp,{remote:true,dice:exp==='Le dé ENTRE NOUS',partnerName:remotePartnerName,inviteCode:code,mode:'a2',presence:'distance'});
 }
-function shareInvite(code,method){
+async function shareInvite(code){
  const p=S.partners.find(x=>x.code===code),exp=p?.experience||inviteExp.value,name=p?.name||inviteName.value.trim()||'toi',token=p?.inviteToken,partnerCode=p?.partnerCode||'';
  if(!token)return toast('Cette invitation doit être recréée pour être sécurisée.');
  const url=EN_APP_URL()+'?invite='+encodeURIComponent(token);
  const from=S.profile?.name||'Quelqu’un';
  const text=`ENTRE NOUS ❤️\n\n${from} t’invite à jouer avec moi !\n\n🎮 Activité : ${exp}\n🔗 Ouvre ce lien pour rejoindre la partie :\n${url}\n\n🔐 Ton code personnel : ${partnerCode}\n\nGarde ce code : il restera le même pour tes prochaines invitations ENTRE NOUS.\n\nÀ tout de suite 😉`;
- if(method==='wa')location.href='https://wa.me/?text='+encodeURIComponent(text);
- else if(method==='sms')location.href='sms:?body='+encodeURIComponent(text);
- else if(method==='mail')location.href='mailto:?subject='+encodeURIComponent(`Invitation ENTRE NOUS — ${exp}`)+'&body='+encodeURIComponent(text);
- else{navigator.clipboard?.writeText(text);toast('Message d’invitation copié 🔒❤️')}
+ if(navigator.share){
+   try{await navigator.share({title:`Invitation ENTRE NOUS — ${exp}`,text});return}catch(e){if(e?.name==='AbortError')return}
+ }
+ try{await navigator.clipboard.writeText(text);toast('Message copié. Choisis ensuite où l’envoyer 📋❤️')}catch(_){prompt('Copie ce message pour l’envoyer :',text)}
 }
 function showInviteWelcome(inviter,invited,experience){
  let box=document.getElementById('enInviteWelcome');if(!box){box=document.createElement('div');box.id='enInviteWelcome';box.style.cssText='position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.88);backdrop-filter:blur(10px)';box.innerHTML=`<div style="width:min(520px,100%);text-align:center;padding:34px 24px;border-radius:28px;background:var(--card,#171717);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 80px rgba(0,0,0,.45)"><div style="font-size:48px;margin-bottom:12px">❤️</div><div class="eyebrow">ENTRE NOUS</div><h1 style="margin:8px 0 14px">Bienvenue <span id="enInviteWelcomeName"></span> 👋</h1><p class="p" style="font-size:18px">Tu as été invité(e) par <strong id="enInviteWelcomeFrom"></strong> à participer à cette activité.</p><div class="panel" style="margin:22px 0;text-align:left"><div class="small">🎮 Activité</div><strong id="enInviteWelcomeExp" style="font-size:20px"></strong></div><button class="btn" id="enInviteWelcomeStart">Continuer 🔒</button></div>`;document.body.appendChild(box)}
