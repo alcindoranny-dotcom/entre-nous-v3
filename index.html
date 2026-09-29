@@ -707,13 +707,12 @@ function renderQuestion(){
 const q=cur.qs[cur.i];if(!q)return;
 round.textContent=cur.name==="Défis absurdes"?`🎭 Défis absurdes · ${cur.challengeLevel==="hard"?"🔴 Hard":"🟢 Soft"}`:(cur.theme||cur.name);
 meta.textContent=cur.name==="Défis absurdes"?`Défi ${cur.i+1} sur ${cur.qs.length}`:`Carte ${cur.i+1} sur ${cur.qs.length}`;
-if(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?"){
- const player=cur.players[(cur.turnIndex||0)%cur.players.length];
- question.innerHTML=`<div class="small" style="margin-bottom:10px;opacity:.8">🎤 C'est au tour de</div><div style="font-size:1.15em;font-weight:800;margin-bottom:14px">👉 ${esc(player)}</div>`;
-}
+const bandePlayer=(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?")?cur.players[(cur.turnIndex||0)%cur.players.length]:"";
 
 if(cur.name==="Qui me connaît ?"){
  question.innerHTML='<div class="small" style="margin-bottom:14px;opacity:.8">À ton avis, quelle serait ma réponse ?</div><div>'+q+'</div>';
+}else if(bandePlayer){
+ question.innerHTML='<div class="small" style="margin-bottom:10px;opacity:.8">🎤 C’est au tour de</div><div style="font-size:1.15em;font-weight:800;margin-bottom:14px">👉 '+esc(bandePlayer)+'</div><div>'+q+'</div>';
 }else{
  question.textContent=q;
 }
@@ -735,7 +734,7 @@ function next(){
 if(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?")cur.turnIndex=((cur.turnIndex||0)+1)%cur.players.length;
 cur.i++;
 if(cur.i>=cur.qs.length){if(diceMode){question.textContent="Lance à nouveau le dé pour un autre thème.";answer.value="";bar.style.width="100%";return}finish();return}
-S.sessions[0].i=cur.i;S.sessions[0].a=cur.a;save();renderQuestion()
+S.sessions[0].i=cur.i;S.sessions[0].a=cur.a;S.sessions[0].turnIndex=cur.turnIndex||0;save();renderQuestion()
 }
 async function saveAnswer(){cur.a[cur.i]=answer.value.trim();try{await saveAnswerRemote(cur.i,cur.qs[cur.i],cur.a[cur.i],false)}catch(e){console.error(e)}S.sessions[0].a=cur.a;save();next()}
 async function skip(){cur.a[cur.i]="";try{await saveAnswerRemote(cur.i,cur.qs[cur.i],null,false)}catch(e){console.error(e)}S.sessions[0].skipped=(S.sessions[0].skipped||[]).concat(cur.i);save();next()}
