@@ -808,10 +808,12 @@ function renderQuiMeConnaitBande(){
 }
 
 function renderQuestion(){
+answer?.classList.remove("hidden");
+if(cur?.name==="Qui me connaît ?" && cur?.mode==="bande" && cur?.presence==="presentiel"){renderQuiMeConnaitBande();return;}
 const q=cur.qs[cur.i];if(!q)return;
 round.textContent=cur.name==="Défis absurdes"?`🎭 Défis absurdes · ${cur.challengeLevel==="hard"?"🔴 Hard":"🟢 Soft"}`:(cur.theme||cur.name);
 meta.textContent=cur.name==="Défis absurdes"?`Défi ${cur.i+1} sur ${cur.qs.length}`:`Carte ${cur.i+1} sur ${cur.qs.length}`;
-const bandePlayer=(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&true)?cur.players[(cur.turnIndex||0)%cur.players.length]:"";
+const bandePlayer=(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?")?cur.players[(cur.turnIndex||0)%cur.players.length]:"";
 
 if(cur.name==="Qui me connaît ?"){
  question.innerHTML='<div class="small" style="margin-bottom:14px;opacity:.8">À ton avis, quelle serait ma réponse ?</div><div>'+q+'</div>';
