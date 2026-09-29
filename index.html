@@ -645,8 +645,8 @@ if(name==="Défis absurdes"){
  const hard=Q[name]||[];
  if(!opts.challengeLevel){openChallengeChooser();return}
  diceMode=false;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};
- cur={name,qs:(opts.challengeLevel==="hard"?hard:soft).slice(),i:0,a:[],theme:null,challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||""};
- S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode:false,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||"",challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();
+ cur={name,qs:(opts.challengeLevel==="hard"?hard:soft).slice(),i:0,a:[],theme:null,challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||"",qmkPhase:(opts.mode==="bande"&&name==="Qui me connaît ?"&&opts.presence==="presentiel")?"chooseQuestion":null,qmkTargetOrder:null,qmkRound:0,qmkTargetIndex:null,qmkQuestionIndex:null,qmkTargetAnswer:"",qmkGuesserIndex:0,qmkGuesserAnswers:{}};
+ S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode:false,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||"",qmkPhase:null,qmkTargetOrder:null,qmkRound:0,qmkTargetIndex:null,qmkQuestionIndex:null,qmkTargetAnswer:"",qmkGuesserIndex:0,qmkGuesserAnswers:{},challengeLevel:opts.challengeLevel,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();
  trackEvent("game_started",{game:name,remote:!!remoteMode,challengeLevel:opts.challengeLevel});
  go("game");setupGameUI();renderQuestion();return;
 }
@@ -703,11 +703,115 @@ currentTheme=theme;cur.theme=theme;
 const qs=Q[theme]||[];const used=diceHistory[theme]||0;diceHistory[theme]=used+1;cur.qs=qs;cur.i=used%qs.length;cur.a=cur.a||[];
 setTimeout(()=>{diceTheme.textContent=theme;renderQuestion();},800);
 }
+function persistQuiMeConnaitBande(){
+  if(!S.sessions[0])return;
+  const s=S.sessions[0];
+  s.qmkPhase=cur.qmkPhase;s.qmkTargetIndex=cur.qmkTargetIndex;s.qmkQuestionIndex=cur.qmkQuestionIndex;
+  s.qmkTargetAnswer=cur.qmkTargetAnswer;s.qmkGuesserIndex=cur.qmkGuesserIndex;s.qmkGuesserAnswers=cur.qmkGuesserAnswers||{};
+  s.qmkTargetOrder=cur.qmkTargetOrder;s.qmkRound=cur.qmkRound;s.qmkRevealed=!!cur.qmkRevealed;
+  save();
+}
+function qmkShuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+function qmkInit(){
+  const players=Array.isArray(cur.players)?cur.players:[];
+  if(players.length<3)return false;
+  if(!Array.isArray(cur.qmkTargetOrder)||cur.qmkTargetOrder.length!==players.length){
+    cur.qmkTargetOrder=qmkShuffle(players.map((_,i)=>i));cur.qmkRound=0;
+  }
+  if(cur.qmkTargetIndex==null)cur.qmkTargetIndex=cur.qmkTargetOrder[cur.qmkRound||0];
+  if(!cur.qmkPhase)cur.qmkPhase='chooseQuestion';
+  if(!cur.qmkGuesserAnswers)cur.qmkGuesserAnswers={};
+  if(cur.qmkGuesserIndex==null)cur.qmkGuesserIndex=0;
+  return true;
+}
+function qmkQuestionCards(){
+  const qs=Q['Qui me connaît ?']||[];
+  return qs.map((q,i)=>'<button type="button" class="btn ghost qmk-q" style="text-align:left;margin:5px 0" onclick="qmkChooseQuestion('+i+')"><b>'+String(i+1)+'.</b> '+esc(q)+'</button>').join('');
+}
+function qmkGuesserOrder(){
+  const n=cur.players.length,t=cur.qmkTargetIndex;
+  return cur.players.map((_,i)=>i).filter(i=>i!==t);
+}
+function qmkCurrentGuesser(){return qmkGuesserOrder()[cur.qmkGuesserIndex||0]}
+function qmkRenderShell(html){
+  question.innerHTML=html;answer.value='';
+  const generic=document.getElementById('gameActions');
+  if(generic)generic.classList.add('hidden');
+  let box=document.getElementById('qmkActions');
+  if(!box){box=document.createElement('div');box.id='qmkActions';box.className='card';question.parentNode.insertBefore(box,question.nextSibling)}
+  box.innerHTML='';box.classList.remove('hidden');
+}
+function qmkChooseQuestion(i){
+  if(cur.qmkPhase!=='chooseQuestion')return;
+  cur.qmkQuestionIndex=i;cur.qmkPhase='targetAnswer';cur.qmkTargetAnswer='';persistQuiMeConnaitBande();renderQuiMeConnaitBande();
+}
+function qmkSubmitTargetAnswer(){
+  const v=answer.value.trim();if(!v)return toast('Écris ta réponse avant de valider.');
+  cur.qmkTargetAnswer=v;cur.qmkGuesserAnswers={};cur.qmkGuesserIndex=0;cur.qmkPhase='passToGuessers';persistQuiMeConnaitBande();renderQuiMeConnaitBande();
+}
+function qmkStartGuessing(){cur.qmkPhase='guessers';persistQuiMeConnaitBande();renderQuiMeConnaitBande()}
+function qmkSubmitGuesser(){
+  const v=answer.value.trim();if(!v)return toast('Écris ta réponse avant de valider.');
+  const gi=qmkCurrentGuesser();cur.qmkGuesserAnswers[gi]=v;
+  const order=qmkGuesserOrder();
+  if((cur.qmkGuesserIndex||0)+1<order.length){cur.qmkGuesserIndex++;cur.qmkPhase='passToGuesser';}
+  else cur.qmkPhase='reveal';
+  persistQuiMeConnaitBande();renderQuiMeConnaitBande();
+}
+function qmkRevealAnswer(){cur.qmkPhase='reveal';persistQuiMeConnaitBande();renderQuiMeConnaitBande()}
+function qmkNextRound(){
+  cur.qmkRound=(cur.qmkRound||0)+1;
+  if(cur.qmkRound>=cur.players.length){finish();return;}
+  cur.qmkTargetIndex=cur.qmkTargetOrder[cur.qmkRound];cur.qmkQuestionIndex=null;cur.qmkTargetAnswer='';cur.qmkGuesserAnswers={};cur.qmkGuesserIndex=0;cur.qmkRevealed=false;cur.qmkPhase='chooseQuestion';
+  cur.i=cur.qmkRound;persistQuiMeConnaitBande();renderQuiMeConnaitBande();
+}
+function qmkEscHtml(v){return esc(String(v||''))}
+function renderQuiMeConnaitBande(){
+  if(!qmkInit())return;
+  const target=cur.players[cur.qmkTargetIndex],qs=Q['Qui me connaît ?']||[];
+  round.textContent='Tour '+((cur.qmkRound||0)+1)+' / '+cur.players.length;
+  meta.textContent='🎯 Qui me connaît ? · En bande';
+  const generic=document.getElementById('gameActions');if(generic)generic.classList.add('hidden');
+  if(cur.qmkPhase==='chooseQuestion'){
+    qmkRenderShell('<div class="small">🎯 C’est au tour de</div><div style="font-size:25px;font-weight:900;margin:8px 0 16px">👉 '+qmkEscHtml(target)+'</div><div class="small">Choisis <b>une seule question</b> parmi les 10 :</div><div style="margin-top:10px">'+qmkQuestionCards()+'</div>');
+    return;
+  }
+  const q=qs[cur.qmkQuestionIndex]||'';
+  if(cur.qmkPhase==='targetAnswer'){
+    qmkRenderShell('<div class="small">🔒 '+qmkEscHtml(target)+', réponds secrètement</div><div class="question">'+qmkEscHtml(q)+'</div><div class="small">Les autres ne doivent pas voir ta réponse.</div>');
+    document.getElementById('qmkActions').innerHTML='<button class="btn" onclick="qmkSubmitTargetAnswer()">Valider ma réponse 🔒</button>';
+    return;
+  }
+  if(cur.qmkPhase==='passToGuessers'){
+    const g=qmkCurrentGuesser();
+    qmkRenderShell('<div class="small">🔒 Réponse de '+qmkEscHtml(target)+' enregistrée.</div><div style="font-size:23px;font-weight:900;margin:14px 0">Passe le téléphone à 👉 '+qmkEscHtml(cur.players[g])+'</div><p class="small">La réponse de '+qmkEscHtml(target)+' reste cachée.</p>');
+    document.getElementById('qmkActions').innerHTML='<button class="btn" onclick="qmkStartGuessing()">Continuer</button>';
+    return;
+  }
+  if(cur.qmkPhase==='passToGuesser'){
+    const g=qmkCurrentGuesser();
+    qmkRenderShell('<div class="small">🎤 À toi</div><div style="font-size:25px;font-weight:900;margin:8px 0">👉 '+qmkEscHtml(cur.players[g])+'</div><p class="small">Passe le téléphone à cette personne.</p>');
+    document.getElementById('qmkActions').innerHTML='<button class="btn" onclick="cur.qmkPhase=\'guessers\';persistQuiMeConnaitBande();renderQuiMeConnaitBande()">Continuer</button>';
+    return;
+  }
+  if(cur.qmkPhase==='guessers'){
+    const g=qmkCurrentGuesser();
+    qmkRenderShell('<div class="small">🎤 À toi '+qmkEscHtml(cur.players[g])+' !</div><div class="question">Quel est '+qmkEscHtml(q.toLowerCase().replace(/^quel est mon /i,'le '))+' de '+qmkEscHtml(target)+' ?</div><p class="small">Réponds sans regarder la réponse de '+qmkEscHtml(target)+'.</p>');
+    document.getElementById('qmkActions').innerHTML='<button class="btn" onclick="qmkSubmitGuesser()">Valider ma réponse</button>';
+    return;
+  }
+  const normalize=v=>String(v||'').toLocaleLowerCase('fr-FR').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+  const targetAns=normalize(cur.qmkTargetAnswer);let exact=0;
+  const rows=qmkGuesserOrder().map(i=>{const a=cur.qmkGuesserAnswers?.[i]||'';const ok=!!a&&normalize(a)===targetAns;if(ok)exact++;return '<div class="panel" style="margin:8px 0"><b>'+qmkEscHtml(cur.players[i])+'</b> → '+qmkEscHtml(a)+' '+(ok?'✅':'❌')+'</div>'}).join('');
+  qmkRenderShell('<div class="small">🔥 La réponse de '+qmkEscHtml(target)+' était…</div><div style="font-size:28px;font-weight:900;margin:10px 0">🍕 '+qmkEscHtml(cur.qmkTargetAnswer)+'</div><div class="small">Réponses des autres :</div>'+rows+'<div style="font-size:18px;font-weight:800;margin-top:14px">🎯 Correspondances exactes : '+exact+' / '+qmkGuesserOrder().length+'</div>');
+  document.getElementById('qmkActions').innerHTML='<button class="btn" onclick="qmkNextRound()">'+((cur.qmkRound||0)+1<cur.players.length?'🎯 Joueur suivant':'🏁 Terminer la partie')+'</button>';
+}
+
 function renderQuestion(){
 const q=cur.qs[cur.i];if(!q)return;
 round.textContent=cur.name==="Défis absurdes"?`🎭 Défis absurdes · ${cur.challengeLevel==="hard"?"🔴 Hard":"🟢 Soft"}`:(cur.theme||cur.name);
 meta.textContent=cur.name==="Défis absurdes"?`Défi ${cur.i+1} sur ${cur.qs.length}`:`Carte ${cur.i+1} sur ${cur.qs.length}`;
-const bandePlayer=(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&cur.name!=="Qui me connaît ?")?cur.players[(cur.turnIndex||0)%cur.players.length]:"";
+const bandePlayer=(cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length&&true)?cur.players[(cur.turnIndex||0)%cur.players.length]:"";
 
 if(cur.name==="Qui me connaît ?"){
  question.innerHTML='<div class="small" style="margin-bottom:14px;opacity:.8">À ton avis, quelle serait ma réponse ?</div><div>'+q+'</div>';
@@ -747,7 +851,7 @@ function launchConfetti(){
 function finish(){if(S.sessions[0]){S.sessions[0].status="Terminée";S.sessions[0].i=cur.qs.length;S.sessions[0].a=cur.a}save();launchConfetti();go("finish",false)}
 function quit(){if(cur&&S.sessions[0]){S.sessions[0].i=cur.i;S.sessions[0].a=cur.a}save();go("sessions",false)}
 function renderSessions(){sessionList.innerHTML=S.sessions.length?S.sessions.map((s,i)=>`<div class="panel"><span class="badge">${s.status}</span><h3>${s.name}</h3><p class="small">Progression : ${Math.min(s.i||0,(s.diceMode?6:(Q[s.name]||[]).length))} cartes</p><div class="actions"><button class="btn" onclick="resume(${i})">Reprendre</button><button class="btn ghost" onclick="delSession(${i})">Supprimer</button></div></div>`).join(""):`<div class="empty">Aucune partie pour le moment.</div>`}
-function resume(i){const s=S.sessions[i];let questions=(Q[s.name]||Q["Se découvrir"]);if(PACK_EXP.has(s.name)&&!hasPack(s.name))questions=questions.slice(0,4);cur={name:s.name,qs:s.diceMode?[]:(s.name==="Défis absurdes"?(s.challengeLevel==="hard"?(Q[s.name]||[]):["Mange une petite bouchée de citron avec une pincée de sel.","Cours 10 mètres en faisant une démarche complètement ridicule.","Marche 10 pas les yeux fermés, guidé(e) par quelqu’un.","Fais une imitation pendant 30 secondes.","Danse sans musique pendant 20 secondes.","Fais deviner un objet sans parler.","Fais le tour de la pièce en marchant comme un pingouin.","Chante le refrain d’une chanson avec une voix ridicule."]):questions),i:s.i||0,a:s.a||[],theme:s.theme||null,challengeLevel:s.challengeLevel||null,inviteCode:s.inviteCode||"",mode:s.mode||"a2",presence:s.presence||"presentiel",players:s.players||[],turnIndex:s.turnIndex||0,dinguerieContext:s.dinguerieContext||""};diceMode=!!s.diceMode;remoteMode=!!s.remoteMode;remotePartnerName=s.partnerName||"";go("game");setupGameUI();if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes"}else renderQuestion()}
+function resume(i){const s=S.sessions[i];let questions=(Q[s.name]||Q["Se découvrir"]);if(PACK_EXP.has(s.name)&&!hasPack(s.name))questions=questions.slice(0,4);cur={name:s.name,qs:s.diceMode?[]:(s.name==="Défis absurdes"?(s.challengeLevel==="hard"?(Q[s.name]||[]):["Mange une petite bouchée de citron avec une pincée de sel.","Cours 10 mètres en faisant une démarche complètement ridicule.","Marche 10 pas les yeux fermés, guidé(e) par quelqu’un.","Fais une imitation pendant 30 secondes.","Danse sans musique pendant 20 secondes.","Fais deviner un objet sans parler.","Fais le tour de la pièce en marchant comme un pingouin.","Chante le refrain d’une chanson avec une voix ridicule."]):questions),i:s.i||0,a:s.a||[],theme:s.theme||null,challengeLevel:s.challengeLevel||null,inviteCode:s.inviteCode||"",mode:s.mode||"a2",presence:s.presence||"presentiel",players:s.players||[],turnIndex:s.turnIndex||0,dinguerieContext:s.dinguerieContext||"",qmkPhase:s.qmkPhase||null,qmkTargetOrder:s.qmkTargetOrder||null,qmkRound:s.qmkRound||0,qmkTargetIndex:s.qmkTargetIndex??null,qmkQuestionIndex:s.qmkQuestionIndex??null,qmkTargetAnswer:s.qmkTargetAnswer||"",qmkGuesserIndex:s.qmkGuesserIndex||0,qmkGuesserAnswers:s.qmkGuesserAnswers||{},qmkRevealed:!!s.qmkRevealed};diceMode=!!s.diceMode;remoteMode=!!s.remoteMode;remotePartnerName=s.partnerName||"";go("game");setupGameUI();if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes"}else renderQuestion()}
 function delSession(i){S.sessions.splice(i,1);save();renderSessions()}
 function resumePartner(index){
  const p=S.partners[index];
