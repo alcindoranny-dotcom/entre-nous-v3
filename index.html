@@ -891,7 +891,7 @@ async function joinGameRoom(codeFromLink){
  }catch(e){console.error(e);toast(e?.message||'Code de partie invalide ou expiré.');}
 }
 function gameRoomShareText(code,exp){
- const url=EN_APP_URL()+'?room='+encodeURIComponent(code);return 'ENTRE NOUS ❤️\n\n🎮 Rejoins ma partie : '+exp+'\n\n🔢 Code de partie : '+code+'\n\n🔗 Lien direct : '+url+'\n\n👉 Clique sur le lien ou ouvre ENTRE NOUS puis choisis « Rejoindre une partie » et entre ce code à 4 chiffres.\n\nCe code donne accès uniquement à cette partie.';
+ const url=EN_APP_URL()+'?room='+encodeURIComponent(code)+'&exp='+encodeURIComponent(exp);return 'ENTRE NOUS ❤️\n\n🎮 Rejoins ma partie : '+exp+'\n\n🔢 Code de partie : '+code+'\n\n🔗 Lien direct : '+url+'\n\n👉 Clique sur le lien ou ouvre ENTRE NOUS puis choisis « Rejoindre une partie » et entre ce code à 4 chiffres.\n\nCe code donne accès uniquement à cette partie.';
 }
 function shareGameRoomWhatsApp(code,exp){
  const text=gameRoomShareText(code,exp);location.href='https://wa.me/?text='+encodeURIComponent(text);
