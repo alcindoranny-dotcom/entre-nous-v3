@@ -771,7 +771,7 @@ function renderQuiMeConnaitBande(){
   const target=cur.players[cur.qmkTargetIndex],qs=Q['Qui me connaît ?']||[];
   round.textContent='Tour '+((cur.qmkRound||0)+1)+' / '+cur.players.length;
   meta.textContent='🎯 Qui me connaît ? · En bande';
-  const generic=document.getElementById('gameActions');if(generic)generic.classList.add('hidden');
+  const generic=document.getElementById("gameActions");if(generic)generic.classList.add("hidden");document.querySelector("#game")?.querySelectorAll(".actions").forEach(el=>el.classList.add("hidden"));
   if(cur.qmkPhase==='chooseQuestion'){
     qmkRenderShell('<div class="small">🎯 C’est au tour de</div><div style="font-size:25px;font-weight:900;margin:8px 0 16px">👉 '+qmkEscHtml(target)+'</div><div class="small">Choisis <b>une seule question</b> parmi les 10 :</div><div style="margin-top:10px">'+qmkQuestionCards()+'</div>');
     return;
