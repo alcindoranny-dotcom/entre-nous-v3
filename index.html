@@ -578,9 +578,12 @@ function startSelectedGame(){
  if(EN_GAME_MODE==="a2" && !partner)return toast("Ajoute le prénom ou pseudo de l'autre personne.");
  window.__EN_ACTIVE_FORMAT={mode:EN_GAME_MODE,presence:EN_GAME_PRESENCE,players:players.slice(),partnerName:partner};
  if(EN_GAME_PRESENCE==="distance"){
-   const exp=document.getElementById("inviteExp");if(exp)exp.value=name;
-   const inv=document.getElementById("inviteName");if(inv)inv.value=EN_GAME_MODE==="a2"?partner:players[1]||"";
-   go("distance");return;
+   const exp=document.getElementById("multiRoomExp");if(exp)exp.value=name;
+   go("distance");
+   if(EN_GAME_MODE==="bande"){setTimeout(()=>createMultiRoom(),80);return;}
+   const inv=document.getElementById("inviteExp");if(inv)inv.value=name;
+   const person=document.getElementById("inviteName");if(person)person.value=partner;
+   return;
  }
  startGame(name,{remote:false,partnerName:partner,mode:EN_GAME_MODE,presence:EN_GAME_PRESENCE,players});
 }
@@ -609,9 +612,13 @@ function startSelectedExperience(){
  if(cfg.mode==="bande" && (cfg.players.length<3||cfg.players.length>10))return toast("La Bande doit compter de 3 à 10 personnes.");
  if(cfg.mode==="a2" && !cfg.partner)return toast("Ajoute le prénom ou pseudo de l'autre personne.");
  if(cfg.presence==="distance"){
-   const exp=document.getElementById("inviteExp");if(exp)exp.value=name;
-   const inv=document.getElementById("inviteName");if(inv)inv.value=cfg.mode==="a2"?cfg.partner:cfg.players[1]||"";
-   go("distance");return;
+   window.__EN_ACTIVE_FORMAT={mode:cfg.mode,presence:cfg.presence,players:cfg.players.slice(),partnerName:cfg.partner};
+   const exp=document.getElementById("multiRoomExp");if(exp)exp.value=name;
+   go("distance");
+   if(cfg.mode==="bande"){setTimeout(()=>createMultiRoom(),80);return;}
+   const invExp=document.getElementById("inviteExp");if(invExp)invExp.value=name;
+   const inv=document.getElementById("inviteName");if(inv)inv.value=cfg.partner;
+   return;
  }
  window.__EN_ACTIVE_FORMAT={mode:cfg.mode,presence:cfg.presence,players:cfg.players.slice(),partnerName:cfg.partner};startGame(name,{remote:false,partnerName:cfg.partner,mode:cfg.mode,presence:cfg.presence,players:cfg.players});
 }
@@ -884,7 +891,7 @@ async function joinGameRoom(){
  }catch(e){console.error(e);toast(e?.message||'Code de partie invalide ou expiré.');}
 }
 function gameRoomShareText(code,exp){
- return 'ENTRE NOUS ❤️\n\n🎮 Rejoins ma partie : '+exp+'\n\n🔢 Code de partie : '+code+'\n\n👉 Ouvre ENTRE NOUS puis choisis « Rejoindre une partie » et entre ce code à 4 chiffres.\n\nCe code donne accès uniquement à cette partie.';
+ const url=EN_APP_URL()+'?room='+encodeURIComponent(code);return 'ENTRE NOUS ❤️\n\n🎮 Rejoins ma partie : '+exp+'\n\n🔢 Code de partie : '+code+'\n\n🔗 Lien direct : '+url+'\n\n👉 Clique sur le lien ou ouvre ENTRE NOUS puis choisis « Rejoindre une partie » et entre ce code à 4 chiffres.\n\nCe code donne accès uniquement à cette partie.';
 }
 function shareGameRoomWhatsApp(code,exp){
  const text=gameRoomShareText(code,exp);location.href='https://wa.me/?text='+encodeURIComponent(text);
