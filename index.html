@@ -808,7 +808,7 @@ function renderQuiMeConnaitBande(){
 }
 
 function renderQuestion(){
-answer?.classList.remove("hidden");
+answer?.classList.remove("hidden");document.querySelector("#game")?.querySelectorAll(".actions").forEach(el=>el.classList.remove("hidden"));
 if(cur?.name==="Qui me connaît ?" && cur?.mode==="bande" && cur?.presence==="presentiel"){renderQuiMeConnaitBande();return;}
 const q=cur.qs[cur.i];if(!q)return;
 round.textContent=cur.name==="Défis absurdes"?`🎭 Défis absurdes · ${cur.challengeLevel==="hard"?"🔴 Hard":"🟢 Soft"}`:(cur.theme||cur.name);
