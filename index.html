@@ -881,8 +881,8 @@ async function createMultiRoom(){
   const out=document.getElementById('multiRoomOut');if(out)out.innerHTML='<div class="panel" style="text-align:center;margin-top:12px"><div class="small">🎉 Partie créée</div><div class="small" style="margin-top:8px">Code de cette partie</div><strong style="font-size:38px;letter-spacing:8px">'+esc(room.room_code)+'</strong><p class="fine">Ce code donne accès uniquement à cette partie.</p><div class="actions" style="margin-top:12px;display:grid;gap:8px"><button class="btn wa" onclick="shareGameRoomWhatsApp(\''+esc(room.room_code)+'\',\''+esc(exp)+'\')">📱 Envoyer par WhatsApp</button><button class="btn ghost" onclick="shareGameRoomMail(\''+esc(room.room_code)+'\',\''+esc(exp)+'\')">📧 Envoyer par e-mail</button><button class="btn ghost" onclick="shareGameRoomCopy(\''+esc(room.room_code)+'\',\''+esc(exp)+'\')">🔢 Copier le code + message</button><button class="btn" onclick="startCreatedMultiRoom(\''+esc(room.room_code)+'\',\''+esc(exp)+'\')">▶️ Lancer ma partie</button></div></div>';
  }catch(e){console.error(e);toast(e?.message||'Impossible de créer la partie.');}
 }
-async function joinGameRoom(){
- const code=(document.getElementById('joinRoomCode')?.value||'').replace(/\s/g,'');if(!/^\d{4}$/.test(code))return toast('Entre le code de partie à 4 chiffres.');
+async function joinGameRoom(codeFromLink){
+ const code=(codeFromLink||(document.getElementById('joinRoomCode')?.value||'')).replace(/\s/g,'');if(!/^\d{4}$/.test(code))return toast('Entre le code de partie à 4 chiffres.');
  try{
   await ensureConnection();const {data,error}=await sb.rpc('join_game_room',{p_room_code:code});if(error)throw error;const room=Array.isArray(data)?data[0]:data;if(!room?.game_id)throw new Error('Partie introuvable ou terminée.');
   const {data:g,error:ge}=await sb.from('games').select('*').eq('id',room.game_id).single();if(ge)throw ge;EN_GAME=g;
@@ -983,7 +983,9 @@ const params=new URLSearchParams(location.search);
 if(params.get("reset")==="1")window.__EN_PASSWORD_RECOVERY=true;
 if(params.get("payment")==="success"){trackEvent("payment_success",{source:"stripe_redirect"});toast("Paiement reçu ❤️ Activation de ton accès...");setTimeout(refreshEntitlements,1800);}
 const invite=params.get("invite");
+const roomLink=params.get("room");
 if(invite){setTimeout(()=>handlePrivateInvite(),250);}
+else if(roomLink){setTimeout(()=>joinGameRoom(roomLink),350);}
 </script>
 <button id="enBottomReturn" class="en-bottom-return" type="button" aria-label="Retour" onclick="enBottomBack()">↩</button>
 <div id="challengeChooser" class="en-choice-modal" aria-hidden="true">
