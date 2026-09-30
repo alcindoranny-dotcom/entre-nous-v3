@@ -967,7 +967,7 @@ async function confirmPrivateInvite(){
    try{const {data:part}=await sb.from('participants').select('*').eq('game_id',game.game_id).eq('user_id',EN_USER?.id).maybeSingle();EN_PARTICIPANT=part||null;}catch(_){EN_PARTICIPANT=null}
    remotePartnerName=from||'';window.__privateInviteVerified=true;document.getElementById('enInviteVerify')?.remove();
    if(history.replaceState)history.replaceState({},document.title,EN_APP_URL());
-   startGame(exp,{remote:true,dice:exp==='Le dé ENTRE NOUS',partnerName:from,inviteCode:game.invite_code||''});
+   startGame(exp,{remote:true,dice:exp==='Le dé ENTRE NOUS',partnerName:from,inviteCode:game.invite_code||'',presence:'distance'});
    toast(`Bienvenue ${name} ❤️`);
  }catch(e){console.error(e);if(confirmBtn){confirmBtn.disabled=false;confirmBtn.textContent='Débloquer la partie ❤️';}toast(e?.message==='invalid_partner_code'?'Code incorrect.':e?.message||'Code invalide ou invitation déjà utilisée.');}
 }
