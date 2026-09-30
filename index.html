@@ -208,7 +208,7 @@ async function trackEvent(eventName,metadata={},productKey=null,amount=null){try
 function isCreatorAdmin(){return !!EN_USER?.email&&EN_USER.email.toLowerCase()==="alcindor.anny@gmail.com"}
 async function loadCommercialMetrics(){if(!isCreatorAdmin())return;const box=document.getElementById("commercialMetrics");if(!box)return;box.innerHTML="<p class='small'>Chargement…</p>";try{const {data,error}=await sb.rpc("get_commercial_metrics",{days_back:30});if(error)throw error;const m=data||{};const cards=[["👀","Visiteurs",m.visitors||0],["🎮","Joueurs",m.players||0],["👤","Comptes",m.accounts||0],["💎","Clics Premium",m.premium_clicks||0],["🔥","Clics packs",m.pack_clicks||0],["💳","Paiements détectés",m.payments_detected||0],["💶","CA indicatif",(Number(m.indicative_revenue||0)).toFixed(2)+" €"],["🔄","Sessions récurrentes",m.returning_sessions||0]];box.innerHTML=cards.map(x=>`<div class="card" style="cursor:default"><div style="font-size:22px">${x[0]}</div><b>${x[2]}</b><p class="small">${x[1]}</p></div>`).join("")}catch(e){console.error(e);box.innerHTML="<p class='small'>Statistiques indisponibles pour le moment.</p>"}}
 function renderCommercialAdmin(){const panel=document.getElementById("commercialAdminPanel");if(!panel)return;panel.classList.toggle("hidden",!isCreatorAdmin());if(isCreatorAdmin())loadCommercialMetrics()}
-const EN_APP_URL=()=>location.origin+location.pathname; const EN_PUBLIC_BASE_URL=EN_APP_URL; const AUTH_REDIRECT=()=>EN_APP_URL()+"?auth=confirm";
+const EN_APP_URL=()=>location.origin+location.pathname; const EN_PUBLIC_BASE_URL=()=>"https://entre-nous-v3-espace-partenaire-jeu.vercel.app/"; const AUTH_REDIRECT=()=>EN_APP_URL()+"?auth=confirm";
 function isAnonymousUser(u=EN_USER){return !!u?.is_anonymous}
 function passwordOk(p){return typeof p==="string"&&p.length>=8}
 function setAccountMessage(text,ok=false){const el=document.getElementById("accountStatus");if(el){el.textContent=text;el.style.color=ok?"#8fd8a8":""}}
@@ -977,8 +977,37 @@ async function handlePrivateInvite(){
 }
 
 function startGroup(){const names=(groupNames.value||"").split(",").map(x=>x.trim()).filter(Boolean);if(names.length<3)return toast("Ajoute au moins 3 participants.");const exp=groupExp.value;if(!canOpenExperience(exp))return PACK_EXP.has(exp)?unlockPack(exp):unlockPremium();remotePartnerName=names.slice(1).join(" · ");startGame(exp,{remote:false,partnerName:remotePartnerName});if(S.sessions[0]){S.sessions[0].party="group";S.sessions[0].players=names;S.sessions[0].progress=names.map(name=>({name,percent:0}));save()}toast(`Partie de groupe créée · ${names.length} participants ❤️`)}
-async function shareCurrentQuestion(){if(!cur||!cur.qs[cur.i])return toast("Lance le dé ou affiche une question.");trackEvent("share_question",{game:cur.name});const questionText=cur.qs[cur.i],answerText=(document.getElementById("answer")?.value||"").trim()||"Réponse non renseignée";const gameLink=EN_APP_URL()+"?share="+encodeURIComponent(JSON.stringify({game:cur.name,question:questionText,answer:answerText}));const text=`ENTRE NOUS ❤️\n\n🎮 ${cur.name}\n\n❓ ${questionText}\n\n💬 Ma réponse : ${answerText}\n\n👉 Voir ce partage :\n${gameLink}`;if(navigator.share){try{await navigator.share({title:`ENTRE NOUS — ${cur.name}`,text});return}catch(err){if(err?.name==="AbortError")return}}try{await navigator.clipboard.writeText(text);toast("Message copié. Choisis où l’envoyer 📋❤️")}catch(_){prompt("Copie ce message pour l’envoyer :",text)}}
-function handleSharedQuestion(){const raw=new URLSearchParams(location.search).get("share");if(!raw)return;try{const d=JSON.parse(decodeURIComponent(raw)),box=document.createElement("div");box.id="enSharedBox";box.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.88);backdrop-filter:blur(10px)";box.innerHTML=`<div style="width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:24px"><div class="eyebrow">ENTRE NOUS</div><h2>📤 Partage reçu</h2><p class="small">🎮 ${esc(d.game||"ENTRE NOUS")}</p><div class="panel"><div class="small">❓ Question</div><div style="font-size:21px;font-weight:800;margin-top:8px">${esc(d.question||"")}</div></div><div class="panel"><div class="small">💬 Réponse</div><div style="font-size:19px;margin-top:8px;white-space:pre-wrap">${esc(d.answer||"")}</div></div><button class="btn" onclick="this.closest('#enSharedBox').remove();history.replaceState({},document.title,EN_APP_URL())">Fermer</button></div>`;document.body.appendChild(box)}catch(e){console.warn("Partage invalide",e)}}
+async function createShareToken(payload){
+ const bytes=new Uint8Array(12);crypto.getRandomValues(bytes);
+ const token=btoa(String.fromCharCode(...bytes)).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
+ const {data,error}=await sb.rpc('create_share_link',{p_token:token,p_payload:payload});
+ if(error)throw error;
+ return (Array.isArray(data)?data[0]:data)?.token||token;
+}
+async function shareCurrentQuestion(){
+ if(!cur||!cur.qs[cur.i])return toast("Lance le dé ou affiche une question.");
+ trackEvent("share_question",{game:cur.name});
+ const questionText=cur.qs[cur.i],answerText=(document.getElementById("answer")?.value||"").trim()||"Réponse non renseignée";
+ try{
+   const token=await createShareToken({game:cur.name,question:questionText,answer:answerText});
+   const gameLink=EN_PUBLIC_BASE_URL()+"?share="+encodeURIComponent(token);
+   const text=`ENTRE NOUS ❤️\\n\\n🎮 ${cur.name}\\n\\n❓ ${questionText}\\n\\n💬 Ma réponse : ${answerText}\\n\\n👉 Voir ce partage :\\n${gameLink}`;
+   if(navigator.share){try{await navigator.share({title:`ENTRE NOUS — ${cur.name}`,text});return}catch(err){if(err?.name==="AbortError")return}}
+   try{await navigator.clipboard.writeText(text);toast("Message copié. Choisis où l’envoyer 📋❤️")}catch(_){prompt("Copie ce message pour l’envoyer :",text)}
+ }catch(e){console.error("Création du partage:",e);toast("Impossible de préparer le partage. Réessaie ❤️")}
+}
+async function handleSharedQuestion(){
+ const raw=new URLSearchParams(location.search).get("share");if(!raw)return;
+ try{
+   const {data,error}=await sb.rpc('get_share_link',{p_token:raw});
+   if(error)throw error;
+   const row=Array.isArray(data)?data[0]:data,d=row?.payload||{};
+   const box=document.createElement("div");box.id="enSharedBox";
+   box.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.88);backdrop-filter:blur(10px)";
+   box.innerHTML=`<div style="width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:24px"><div class="eyebrow">ENTRE NOUS</div><h2>📤 Partage reçu</h2><p class="small">🎮 ${esc(d.game||"ENTRE NOUS")}</p><div class="panel"><div class="small">❓ Question</div><div style="font-size:21px;font-weight:800;margin-top:8px">${esc(d.question||"")}</div></div><div class="panel"><div class="small">💬 Réponse</div><div style="font-size:19px;margin-top:8px;white-space:pre-wrap">${esc(d.answer||"")}</div></div><button class="btn" onclick="this.closest('#enSharedBox').remove();history.replaceState({},document.title,EN_APP_URL())">Fermer</button></div>`;
+   document.body.appendChild(box);
+ }catch(e){console.warn("Partage introuvable",e);toast("Ce partage n’est plus disponible ou a expiré.");}
+}
 function shareRecap(){const total=cur?.qs?.length||0,done=Math.min(cur?.i||0,total),percent=total?Math.round(done/total*100):0;const savedResult=S.sessions?.[0]?.profileResult||"";const text=`ENTRE NOUS ❤️
 Expérience : ${cur?.name||"ENTRE NOUS"}
 Progression : ${percent}%
