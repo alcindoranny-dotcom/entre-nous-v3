@@ -155,7 +155,7 @@ body.light .progress{background:#eee5e9}
 <div class="question" id="question"></div>
 <textarea id="answer" class="textarea" placeholder="Ta réponse…"></textarea>
 <div class="actions"><button class="btn ghost" onclick="skip()">Je passe</button><button class="btn ghost" onclick="discuss()">On en rediscute</button></div>
-<div class="actions" style="margin-top:9px"><button class="btn" onclick="saveAnswer()">Enregistrer ma réponse</button><button class="btn wa" onclick="shareCurrentQuestion()">📱 WhatsApp</button></div><button class="btn ghost" style="margin-top:9px" onclick="openMemory()">💾 Garder un souvenir maintenant</button>
+<div class="actions" style="margin-top:9px"><button class="btn" onclick="saveAnswer()">Enregistrer ma réponse</button><button class="btn wa" onclick="shareCurrentQuestion()">📤 Partager</button></div><button class="btn ghost" style="margin-top:9px" onclick="openMemory()">💾 Garder un souvenir maintenant</button>
 </section>
 
 <section id="finish" class="screen"><button class="back btn ghost" onclick="backToGame()">← Retour à la partie</button><div class="hero"><div class="eyebrow" id="finishEyebrow">Souvenir</div><h1 id="finishTitle">Ce moment reste entre nous.</h1><p class="p">Tu peux enregistrer un souvenir à tout moment, même si toutes les questions ne sont pas terminées.</p><input id="memoryTitle" class="input" placeholder="Titre du moment (ex. Conversation à reprendre)" style="margin-bottom:9px"><textarea id="note" class="textarea" placeholder="Une note, un souvenir, une phrase à garder…"></textarea><button class="btn" id="saveMemoryBtn" onclick="saveMemory()">Enregistrer le souvenir ❤️</button><button class="btn ghost" style="margin-top:9px" onclick="shareRecap()">Partager le récapitulatif</button><button class="btn ghost" style="margin-top:9px" onclick="backToGame()">← Revenir à la question</button></div></section>
@@ -164,7 +164,7 @@ body.light .progress{background:#eee5e9}
 
 <section id="distance" class="screen"><button class="back btn ghost" onclick="go('experience')">← Expérience</button><div class="hero"><div class="eyebrow">À distance</div><h1>Partager une partie.</h1>
 <div class="panel"><b>Créer une invitation</b><input id="inviteName" class="input" placeholder="Prénom / pseudo de la personne invitée"><label class="small" style="display:block;margin:12px 0 7px">🎮 Que veux-tu lui envoyer ?</label><select id="inviteExp" class="input"><optgroup label="✨ Expériences"><option>Se découvrir</option><option>Complicité</option><option>Amitié</option><option>Amour</option><option>Bande</option><option>Je te connais… tu aurais répondu ça !</option><option>Nos liens de fraternité</option><option>Parent &amp; Enfant</option><option>Piment</option><option>Couple</option><option>Sexfriend</option><option>Libertin</option><option>10 ans ou plus</option></optgroup><optgroup label="🎲 Jeux"><option>Le dé ENTRE NOUS</option><option>Qui me connaît ?</option><option>Apéro</option><option>Dinguerie</option><option>Souvenirs</option><option>Notre prochain projet</option><option>Quel est ton profil ?</option><option>Défis absurdes</option></optgroup></select><button class="btn" onclick="createInvite()">📤 Partager l’invitation ❤️</button><p class="small">Le téléphone te proposera WhatsApp, SMS, e-mail et les autres applications de partage disponibles.</p><div id="inviteOut"></div></div>
-<div class="panel"><b>Rejoindre</b><input id="joinCode" class="input" placeholder="Code d'invitation"><button class="btn ghost" onclick="joinInvite()">Rejoindre la partie</button></div></div></section>
+</div></section>
 
 <section id="profile" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button><div class="hero"><div class="eyebrow">Profil</div><h1>Mon espace.</h1>
 <div class="panel"><b>👤 Mon compte ENTRE NOUS</b><div class="small" id="accountStatus" style="margin-top:8px"></div>
@@ -977,7 +977,19 @@ async function handlePrivateInvite(){
 }
 
 function startGroup(){const names=(groupNames.value||"").split(",").map(x=>x.trim()).filter(Boolean);if(names.length<3)return toast("Ajoute au moins 3 participants.");const exp=groupExp.value;if(!canOpenExperience(exp))return PACK_EXP.has(exp)?unlockPack(exp):unlockPremium();remotePartnerName=names.slice(1).join(" · ");startGame(exp,{remote:false,partnerName:remotePartnerName});if(S.sessions[0]){S.sessions[0].party="group";S.sessions[0].players=names;S.sessions[0].progress=names.map(name=>({name,percent:0}));save()}toast(`Partie de groupe créée · ${names.length} participants ❤️`)}
-function shareCurrentQuestion(){if(!cur||!cur.qs[cur.i])return toast("Lance le dé ou affiche une question.");trackEvent("whatsapp_question_share",{game:cur.name});const code=cur?.inviteCode||S.sessions?.[0]?.inviteCode||EN_GAME?.invite_code||new URLSearchParams(location.search).get("invite");const gameLink=code?EN_APP_URL()+"?invite="+encodeURIComponent(code)+"&exp="+encodeURIComponent(cur.name):EN_APP_URL();const text=`ENTRE NOUS ❤️\n\n${cur.qs[cur.i]}\n\nÀ toi de répondre 😉\n\nRejoins la partie ici :\n${gameLink}`;location.href="https://wa.me/?text="+encodeURIComponent(text)}
+async function shareCurrentQuestion(){
+ if(!cur||!cur.qs[cur.i])return toast("Lance le dé ou affiche une question.");
+ trackEvent("share_question",{game:cur.name});
+ const code=cur?.inviteCode||S.sessions?.[0]?.inviteCode||EN_GAME?.invite_code||new URLSearchParams(location.search).get("invite");
+ const gameLink=code?EN_APP_URL()+"?invite="+encodeURIComponent(code)+"&exp="+encodeURIComponent(cur.name):EN_APP_URL();
+ const text=`ENTRE NOUS ❤️\\n\\n${cur.qs[cur.i]}\\n\\nÀ toi de répondre 😉\\n\\nRejoins la partie ici :\\n${gameLink}`;
+ if(navigator.share){
+   try{await navigator.share({title:`ENTRE NOUS — ${cur.name}`,text});return}
+   catch(err){if(err?.name==="AbortError")return}
+ }
+ try{await navigator.clipboard.writeText(text);toast("Message copié. Choisis où l’envoyer 📋❤️")}
+ catch(_){prompt("Copie ce message pour l’envoyer :",text)}
+}
 function shareRecap(){const total=cur?.qs?.length||0,done=Math.min(cur?.i||0,total),percent=total?Math.round(done/total*100):0;const savedResult=S.sessions?.[0]?.profileResult||"";const text=`ENTRE NOUS ❤️
 Expérience : ${cur?.name||"ENTRE NOUS"}
 Progression : ${percent}%
