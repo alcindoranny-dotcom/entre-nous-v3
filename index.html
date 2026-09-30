@@ -979,9 +979,8 @@ async function handlePrivateInvite(){
 function startGroup(){const names=(groupNames.value||"").split(",").map(x=>x.trim()).filter(Boolean);if(names.length<3)return toast("Ajoute au moins 3 participants.");const exp=groupExp.value;if(!canOpenExperience(exp))return PACK_EXP.has(exp)?unlockPack(exp):unlockPremium();remotePartnerName=names.slice(1).join(" · ");startGame(exp,{remote:false,partnerName:remotePartnerName});if(S.sessions[0]){S.sessions[0].party="group";S.sessions[0].players=names;S.sessions[0].progress=names.map(name=>({name,percent:0}));save()}toast(`Partie de groupe créée · ${names.length} participants ❤️`)}
 async function createShareToken(payload){
  const bytes=new Uint8Array(12);crypto.getRandomValues(bytes);
- const token=btoa(String.fromCharCode(...bytes)).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
- await ensureConnection();
- const {data,error}=await sb.rpc('create_share_link',{p_token:token,p_payload:JSON.stringify(payload)});
+ const token=btoa(String.fromCharCode(...bytes)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+ const {data,error}=await sb.rpc('create_share_link',{p_token:token,p_payload:payload});
  if(error)throw error;
  return (Array.isArray(data)?data[0]:data)?.token||token;
 }
