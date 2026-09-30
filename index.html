@@ -980,7 +980,8 @@ function startGroup(){const names=(groupNames.value||"").split(",").map(x=>x.tri
 async function createShareToken(payload){
  const bytes=new Uint8Array(12);crypto.getRandomValues(bytes);
  const token=btoa(String.fromCharCode(...bytes)).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
- const {data,error}=await sb.rpc('create_share_link',{p_token:token,p_payload:payload});
+ await ensureConnection();
+ const {data,error}=await sb.rpc('create_share_link',{p_token:token,p_payload:JSON.stringify(payload)});
  if(error)throw error;
  return (Array.isArray(data)?data[0]:data)?.token||token;
 }
