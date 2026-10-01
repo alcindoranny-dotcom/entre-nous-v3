@@ -1022,16 +1022,40 @@ async function handleSharedQuestion(){
    const {data,error}=await sb.rpc('get_share_link',{p_token:raw});
    if(error)throw error;
    const row=Array.isArray(data)?data[0]:data,d=row?.payload||{};
+   if(d.type==="recap"){
+     const box=document.createElement("div");box.id="enSharedBox";
+     box.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.88);backdrop-filter:blur(10px)";
+     box.innerHTML=`<div style="width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:24px"><div class="eyebrow">ENTRE NOUS</div><h2>🏆 Résultat reçu</h2><p class="small">🎮 ${esc(d.game||"ENTRE NOUS")}</p><div class="panel"><div class="small">👤 ${esc(d.from||"Un invité")}</div><div style="font-size:20px;font-weight:800;margin-top:8px">Progression : ${Number(d.progress||0)}%</div><div class="small" style="margin-top:5px">Cartes répondues : ${Number(d.done||0)}/${Number(d.total||0)}</div>${d.result?`<div style="font-size:19px;margin-top:14px;white-space:pre-wrap">${esc(d.result)}</div>`:""}</div><button class="btn" onclick="this.closest('#enSharedBox').remove();history.replaceState({},document.title,EN_APP_URL())">Fermer</button></div>`;
+     document.body.appendChild(box);return;
+   }
    const box=document.createElement("div");box.id="enSharedBox";
    box.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.88);backdrop-filter:blur(10px)";
    box.innerHTML=`<div style="width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:24px"><div class="eyebrow">ENTRE NOUS</div><h2>📤 Partage reçu</h2><p class="small">🎮 ${esc(d.game||"ENTRE NOUS")}</p><div class="panel"><div class="small">❓ Question</div><div style="font-size:21px;font-weight:800;margin-top:8px">${esc(d.question||"")}</div></div><div class="panel"><div class="small">💬 Réponse</div><div style="font-size:19px;margin-top:8px;white-space:pre-wrap">${esc(d.answer||"")}</div></div><button class="btn" onclick="this.closest('#enSharedBox').remove();history.replaceState({},document.title,EN_APP_URL())">Fermer</button></div>`;
    document.body.appendChild(box);
  }catch(e){console.warn("Partage introuvable",e);toast("Ce partage n’est plus disponible ou a expiré.");}
 }
-function shareRecap(){const total=cur?.qs?.length||0,done=Math.min(cur?.i||0,total),percent=total?Math.round(done/total*100):0;const savedResult=S.sessions?.[0]?.profileResult||"";const text=`ENTRE NOUS ❤️
-Expérience : ${cur?.name||"ENTRE NOUS"}
-Progression : ${percent}%
-Cartes répondues : ${done}/${total}${savedResult?`\n${savedResult}`:""}`;if(navigator.share)navigator.share({title:"Récapitulatif ENTRE NOUS",text});else{navigator.clipboard?.writeText(text);toast("Récapitulatif copié")}if(S.profile?.email){setTimeout(()=>{if(confirm("Envoyer aussi le récapitulatif par e-mail ?"))location.href=`mailto:${S.profile.email}?subject=${encodeURIComponent("Mon récapitulatif ENTRE NOUS")}&body=${encodeURIComponent(text)}`},50)}}
+async function shareRecap(){
+ const total=cur?.qs?.length||0,done=Math.min(cur?.i||0,total),percent=total?Math.round(done/total*100):0;
+ const savedResult=S.sessions?.[0]?.profileResult||"";
+ const text=`ENTRE NOUS ❤️
+
+🎮 Expérience : ${cur?.name||"ENTRE NOUS"}
+📊 Progression : ${percent}%
+📝 Cartes répondues : ${done}/${total}${savedResult?`\n🏆 ${savedResult}`:""}
+
+👉 Voir mon résultat :
+`;
+ try{
+   const token=await createShareToken({type:"recap",game:cur?.name||"ENTRE NOUS",progress:percent,done,total,result:savedResult,from:S.profile?.name||"Un invité"});
+   const gameLink=EN_PUBLIC_BASE_URL()+"?share="+encodeURIComponent(token);
+   const finalText=text+gameLink;
+   if(navigator.share){try{await navigator.share({title:`Résultat ENTRE NOUS — ${cur?.name||"ENTRE NOUS"}`,text:finalText});return}catch(err){if(err?.name==="AbortError")return}}
+   try{await navigator.clipboard.writeText(finalText);toast("Résultat prêt à être envoyé 📋❤️")}catch(_){prompt("Copie ce message pour l’envoyer :",finalText)}
+ }catch(e){
+   console.error("Création du partage du résultat:",e);
+   toast("Impossible de préparer le lien du résultat. Réessaie ❤️");
+ }
+}
 
 
 setupAuth();renderCards();renderProfile();
