@@ -812,7 +812,7 @@ function renderQuiMeConnaitBande(){
 }
 
 function renderQuestion(){
-answer?.classList.remove("hidden");document.querySelectorAll("#game .actions,.actions").forEach(el=>el.classList.remove("hidden"));
+if(cur?.name==="Défis absurdes")answer?.classList.add("hidden");else answer?.classList.remove("hidden");document.querySelectorAll("#game .actions,.actions").forEach(el=>el.classList.remove("hidden"));
 const memoryBtn=document.querySelector('#game button[onclick="openMemory()"]');
 if(memoryBtn)memoryBtn.classList.remove("hidden");
 if(cur?.name==="Qui me connaît ?" && cur?.mode==="bande" && cur?.presence==="presentiel"){renderQuiMeConnaitBande();return;}
@@ -836,7 +836,7 @@ if(cur.name==="Défis absurdes"){
  answer.classList.add("hidden");
  let ca=document.getElementById("challengeActions");
  if(!ca){ca=document.createElement("div");ca.id="challengeActions";ca.className="challenge-actions";question.parentNode.insertBefore(ca,answer);}
- ca.innerHTML='<button class="btn ghost" type="button" onclick="markChallenge(true)">✅ Défi réalisé</button><button class="btn ghost" type="button" onclick="markChallenge(false)">❌ Défi non atteint</button>';
+ ca.innerHTML='<button class="btn ghost" type="button" onclick="markChallenge(true)">✅ Défi réalisé</button><button class="btn ghost" type="button" onclick="markChallenge(false)">❌ Défi non atteint</button><button class="btn ghost" type="button" onclick="addCustomChallenge()">💡 Vos idées de création de défis</button>';
  ca.classList.add("challenge-done");setTimeout(()=>ca.classList.remove("challenge-done"),350);
 }else{
  const ca=document.getElementById("challengeActions");if(ca)ca.remove();
@@ -844,6 +844,7 @@ if(cur.name==="Défis absurdes"){
 }
 bar.style.width=(cur.i/cur.qs.length*100)+"%";
 }
+function addCustomChallenge(){if(!cur||cur.name!=="Défis absurdes")return;const idea=prompt("Écris ton idée de défi :","");if(!idea?.trim())return;S.customChallenges=Array.isArray(S.customChallenges)?S.customChallenges:[];S.customChallenges.push({text:idea.trim(),level:cur.challengeLevel||"soft",created:new Date().toISOString()});save();toast("Idée ajoutée à tes défis 💡❤️")}
 function markChallenge(done){if(!cur||cur.name!=="Défis absurdes")return;cur.a[cur.i]=done?"Défi réalisé":"Défi non atteint";if(S.sessions[0]){S.sessions[0].a=cur.a;S.sessions[0].challengeLevel=cur.challengeLevel;save();}setTimeout(next,180)}
 function next(){
 if(cur.name==="Défis absurdes"&&cur.mode==="bande"&&Array.isArray(cur.players)&&cur.players.length){
