@@ -84,6 +84,39 @@ body.light .progress{background:#eee5e9}
 .nav button{min-height:70px;padding:10px 10px;font-size:15px;gap:5px}
 .nav button span{font-size:22px}
 @media(max-width:420px){.nav{min-height:78px}.nav button{min-height:72px;font-size:15px}}
+
+/* EN_CHARM_CURVES_V1 — identité douce, organique et chaleureuse */
+:root{
+ --bg:#1b101a;--panel:rgba(49,29,43,.88);--line:rgba(230,164,190,.25);
+ --pink:#e69ab3;--text:#fff8fb;--muted:#d5bdca;--nav:rgba(30,16,28,.94);
+}
+body{background:radial-gradient(ellipse at 12% 4%,rgba(153,72,113,.22),transparent 36%),radial-gradient(ellipse at 92% 28%,rgba(108,62,111,.2),transparent 34%),linear-gradient(155deg,#1a1019 0%,#241321 52%,#160f19 100%);color:var(--text)}
+body.light{--bg:#fff8fb;--panel:rgba(255,255,255,.88);--line:rgba(176,111,139,.22);--pink:#d982a0;--text:#30202b;--muted:#77616e;--nav:rgba(255,249,252,.94);background:radial-gradient(ellipse at 8% 2%,rgba(245,202,218,.45),transparent 34%),radial-gradient(ellipse at 94% 24%,rgba(224,204,231,.4),transparent 32%),linear-gradient(160deg,#fffafd,#f8edf3 58%,#f5eff8)}
+.app{overflow:hidden}
+.top{padding:14px 20px}
+.logo{letter-spacing:.2em}
+.hero{position:relative;border-radius:0 0 54px 54px;padding:26px 20px 34px;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:auto -12% -62px;height:170px;border-radius:50% 50% 0 0;background:linear-gradient(90deg,rgba(224,137,169,.15),rgba(183,119,169,.12));pointer-events:none}
+.hero .homeLogo{filter:drop-shadow(0 18px 28px rgba(0,0,0,.28));border-radius:32px}
+.hero h1{letter-spacing:-.035em;line-height:1.02}
+.card,.panel{border:1px solid var(--line)!important;border-radius:28px!important;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),var(--panel)!important;box-shadow:0 12px 34px rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,.06)!important;padding:22px!important;position:relative;overflow:hidden}
+.card:before,.panel:before{content:"";position:absolute;top:-48px;right:-38px;width:116px;height:116px;border-radius:50%;background:rgba(230,154,179,.055);pointer-events:none}
+.card h3,.panel h2,.panel h3{letter-spacing:-.02em}
+.card p,.panel p{line-height:1.55}
+.btn,button.btn,.profile-touch,.challenge-level{border-radius:999px!important;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}
+.btn:not(.ghost){background:linear-gradient(110deg,#eaa3ba,#d77f9f)!important;box-shadow:0 8px 20px rgba(207,112,149,.2);border:1px solid rgba(255,255,255,.18)}
+.btn.ghost{border-radius:999px!important;border-color:rgba(225,164,188,.32)!important;background:rgba(255,255,255,.025)}
+.btn:active,button:active,.profile-touch:active{transform:scale(.985)}
+.input,input,textarea,select{border-radius:18px!important}
+.badge{border-radius:999px!important;padding:8px 12px!important}
+.nav{border-radius:28px 28px 0 0!important;border-top:1px solid var(--line)!important;box-shadow:0 -10px 30px rgba(0,0,0,.12);backdrop-filter:blur(18px)}
+.nav button{border-radius:22px!important}
+.nav button.active{background:rgba(224,145,174,.13)!important;color:var(--pink)!important}
+body.light .card,body.light .panel{background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,247,251,.92))!important;border-color:rgba(176,111,139,.22)!important;box-shadow:0 14px 34px rgba(91,48,69,.075),inset 0 1px 0 #fff!important}
+body.light .btn.ghost{background:rgba(255,255,255,.72)!important}
+body.light .nav{background:rgba(255,250,253,.9)!important}
+@media(max-width:600px){.card,.panel{padding:18px!important;border-radius:24px!important}.hero{border-radius:0 0 38px 38px}.hero .homeLogo{border-radius:26px}}
+
 </style>
 </head>
 <body>
