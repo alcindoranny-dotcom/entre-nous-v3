@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ENTRE NOUS</title>
 <style>
-:root{--bg:#100b0f;--panel:#1b1117;--line:#49343d;--pink:#d98da3;--text:#fff;--muted:#b9a8ae;--nav:#100b0fee}
+:root{--bg:#1b1218;--panel:#281c24;--line:#5a414c;--pink:#d98da3;--text:#fff;--muted:#cbbbc1;--nav:rgba(27,18,24,.94)}
 body.light{--bg:#fbf8fa;--panel:#fff;--line:#d8cbd1;--text:#24171d;--muted:#5f5359;--nav:rgba(255,255,255,.96)}
 body.light{background:linear-gradient(180deg,#fff 0,#fbf8fa 55%,#f4edf1 100%);color:var(--text)}
 body.light .card,body.light .panel{background:#fff;border-color:#d8cbd1;box-shadow:0 8px 24px rgba(55,25,38,.06)}body.light .card h3,body.light .card p,body.light .panel h1,body.light .panel h2,body.light .panel h3,body.light .panel b,body.light .panel strong{color:#24171d}body.light .profile-touch,body.light .challenge-level{background:#fff;color:#24171d;border-color:#d8cbd1}body.light .profile-touch * ,body.light .challenge-level *{color:#24171d}
@@ -20,7 +20,7 @@ body.light .concept{background:#fff}
 body.light .concept p,body.light .small,body.light .fine{color:#5f5359}
 body.light .toast{background:#fff;color:#24171d;border-color:#cdbec6}
 body.light .progress{background:#eee5e9}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#281521 0,#100b0f 48%,#0b080a 100%);color:var(--text);font-family:system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#3a2430 0,#1b1218 54%,#130e12 100%);color:var(--text);font-family:system-ui,-apple-system,sans-serif;position:relative}body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:var(--en-watermark-image);background-repeat:no-repeat;background-position:center 46%;background-size:min(72vw,560px);opacity:.045;filter:grayscale(1)}.app{position:relative;z-index:1}
 .app{width:min(620px,100%);min-height:100vh;margin:auto;padding:18px 16px 92px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.logo{letter-spacing:3px;font-size:15px}
 .homeLogo{display:block;width:min(300px,82%);height:auto;margin:4px auto 24px;border-radius:22px;object-fit:contain;box-shadow:0 18px 50px rgba(0,0,0,.28)}.screen{display:none}.screen.active{display:block}
 .hero{padding:24px 4px}.eyebrow{color:var(--pink);text-transform:uppercase;letter-spacing:2px;font-size:11px}.hero h1{font:52px Georgia,serif;line-height:.95;margin:12px 0 18px}.hero h2{font-size:18px;line-height:1.35}.p{color:#d1c2c7;line-height:1.55}
@@ -98,7 +98,7 @@ body.light .progress{background:#eee5e9}
 <p class="small" id="selectedGameLabel">Choisis un jeu puis son format.</p>
 <div class="mode-row">
 <button id="gameModeA2" class="btn ghost mode-btn active" type="button" onclick="setGameMode('a2')">👥 À 2</button>
-<button id="gameModeBande" class="btn ghost mode-btn" type="button" onclick="setGameMode('bande')">👥 En bande</button>
+<button id="gameModeBande" class="btn ghost mode-btn" type="button" onclick="setGameMode('bande')">👥 À plusieurs</button>
 </div>
 <div class="mode-row">
 <button id="gamePresencePresentiel" class="btn ghost mode-btn active" type="button" onclick="setGamePresence('presentiel')">📍 Présentiel</button>
@@ -125,7 +125,7 @@ body.light .progress{background:#eee5e9}
 <p class="small">Choisis le format de ta partie.</p>
 <div class="mode-row">
 <button id="modeA2" class="btn ghost mode-btn active" type="button" onclick="setExperienceMode('a2')">👥 À 2</button>
-<button id="modeBande" class="btn ghost mode-btn" type="button" onclick="setExperienceMode('bande')">👥 En bande</button>
+<button id="modeBande" class="btn ghost mode-btn" type="button" onclick="setExperienceMode('bande')">👥 À plusieurs</button>
 </div>
 <div class="mode-row">
 <button id="presencePresentiel" class="btn ghost mode-btn active" type="button" onclick="setExperiencePresence('presentiel')">📍 Présentiel</button>
@@ -163,7 +163,7 @@ body.light .progress{background:#eee5e9}
 <section id="sessions" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button><div class="hero"><div class="eyebrow">Mes parties</div><h1>Reprendre.</h1><div id="sessionList"></div></div></section><section id="partners" class="screen"><button class="back btn ghost" onclick="goBackTo('profile')">← Retour</button><div class="hero"><div class="eyebrow">Partenaires</div><h1>Mes partenaires.</h1><p class="p">Retrouve tes invitations, tes codes personnels et tes parties avec chaque personne.</p><div id="partnersPageList"></div></div></section>
 
 <section id="distance" class="screen"><button class="back btn ghost" onclick="go('experience')">← Expérience</button><div class="hero"><div class="eyebrow">À distance</div><h1>Partager une partie.</h1>
-<div class="panel"><b>Créer une invitation</b><input id="inviteName" class="input" placeholder="Prénom / pseudo de la personne invitée"><label class="small" style="display:block;margin:12px 0 7px">🎮 Que veux-tu lui envoyer ?</label><select id="inviteExp" class="input"><optgroup label="✨ Expériences"><option>Se découvrir</option><option>Complicité</option><option>Amitié</option><option>Amour</option><option>Bande</option><option>Je te connais… tu aurais répondu ça !</option><option>Nos liens de fraternité</option><option>Parent &amp; Enfant</option><option>Piment</option><option>Couple</option><option>Sexfriend</option><option>Libertin</option><option>10 ans ou plus</option></optgroup><optgroup label="🎲 Jeux"><option>Le dé ENTRE NOUS</option><option>Qui me connaît ?</option><option>Apéro</option><option>Dinguerie</option><option>Souvenirs</option><option>Notre prochain projet</option><option>Quel est ton profil ?</option><option>Défis absurdes</option></optgroup></select><button class="btn" onclick="createInvite()">📤 Partager l’invitation ❤️</button><p class="small">Le téléphone te proposera WhatsApp, SMS, e-mail et les autres applications de partage disponibles.</p><div id="inviteOut"></div></div>
+<div class="panel"><b>Créer une invitation</b><input id="inviteName" class="input" placeholder="Prénom / pseudo de la personne invitée"><label class="small" style="display:block;margin:12px 0 7px">🎮 Que veux-tu lui envoyer ?</label><select id="inviteExp" class="input"><optgroup label="✨ Expériences"><option>Se découvrir</option><option>Complicité</option><option>Amitié</option><option>Amour</option><option>Bande</option><option>Je te connais… tu aurais répondu ça !</option><option>Nos liens de fraternité</option><option>Parent &amp; Enfant</option><option>Piment</option><option>Couple</option><option>Sexfriend</option><option>Libertin</option><option>10 ans ou plus</option></optgroup><optgroup label="🎲 Jeux"><option>Le dé ENTRE NOUS</option><option>Qui me connaît ?</option><option>Apéro</option><option>Dinguerie</option><option>Souvenirs</option><option>Notre prochain projet</option><option>Quel est ton profil ?</option><option>Défis absurdes</option></optgroup></select><button class="btn" onclick="createInvite()">Créer les invitations ❤️</button><p class="small">Le téléphone te proposera WhatsApp, SMS, e-mail et les autres applications de partage disponibles.</p><div id="inviteOut"></div></div>
 </div></section>
 
 <section id="profile" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button><div class="hero"><div class="eyebrow">Profil</div><h1>Mon espace.</h1>
@@ -542,7 +542,7 @@ function deactivateDemoMode(){
   const st=document.getElementById("demoModeStatus");if(st)st.textContent="";
   toast("Mode test désactivé");
 }
-function applyTheme(){const light=localStorage.getItem("EN_THEME")==="light";document.body.classList.toggle("light",light);const b=document.getElementById("themeBtn");if(b)b.textContent=light?"🌙":"☀️"}
+function applyTheme(){const light=localStorage.getItem("EN_THEME")==="light";document.body.classList.toggle("light",light);const b=document.getElementById("themeBtn");if(b)b.textContent=light?"🌙":"☀️";const logo=document.querySelector(".homeLogo");if(logo?.src)document.body.style.setProperty("--en-watermark-image",'url("'+logo.src+'")')}
 function toggleTheme(){const light=!document.body.classList.contains("light");localStorage.setItem("EN_THEME",light?"light":"dark");applyTheme();toast(light?"Mode clair activé ☀️":"Mode sombre activé 🌙")}
 function openMemory(){const mt=document.getElementById("memoryTitle");if(mt)mt.value="";note.value="";document.getElementById("finishEyebrow").textContent="Mes moments";document.getElementById("finishTitle").textContent="Garde ce moment.";go("finish")}
 function watermarkMomentData(data){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{const max=1400,scale=Math.min(1,max/Math.max(img.width,img.height)),w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale)),c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.drawImage(img,0,0,w,h);const pad=Math.max(18,Math.round(w*.025)),font=Math.max(18,Math.round(w*.035));x.save();x.textAlign="right";x.textBaseline="bottom";x.shadowColor="rgba(0,0,0,.55)";x.shadowBlur=8;x.fillStyle="rgba(255,255,255,.88)";x.font="800 "+font+"px system-ui,sans-serif";x.fillText("ENTRE NOUS",w-pad,h-pad);x.font="900 "+Math.round(font*1.35)+"px system-ui,sans-serif";x.fillText("EN",w-pad,h-pad-font-4);x.restore();resolve(c.toDataURL("image/jpeg",.82))};img.onerror=reject;img.src=data})}
@@ -560,7 +560,7 @@ function esc(s){return String(s).replace(/'/g,"\\\\'")}
 function hasPremium(){return isDemoMode() || !!S.premium || !!S.profile?.premium}
 function hasPack(name){return hasPremium() || !!S.packs?.includes(name)}
 function canOpenGame(name){return FREE_GAMES.has(name)||hasPremium()}
-function canOpenExperience(name){return name==="Se découvrir" || (PREMIUM_EXP.has(name)?hasPremium():PACK_EXP.has(name)?hasPack(name):true)}
+function canOpenExperience(name){return true}
 function renderCards(){gameCards.innerHTML=GAMES.map(g=>{const locked=!canOpenGame(g[1]);return `<div class="card" onclick="openGame('${esc(g[1])}')"><div style="font-size:28px">${g[0]}</div><h3>${g[1]} ${locked?"🔒":""}</h3><p>${g[2]}</p></div>`}).join("");experienceCards.innerHTML=EXP.map(e=>{const locked=!canOpenExperience(e[1]);const action=locked?(PREMIUM_EXP.has(e[1])?`unlockPremium()`:`unlockPack('${esc(e[1])}')`):`openExperience('${esc(e[1])}')`;return `<div class="card" onclick="${action}"><div style="font-size:28px">${e[0]}</div><h3>${e[1]} ${locked?"🔒":""}</h3><p>${e[2]}</p></div>`}).join("")}
 let EN_EXP_MODE="a2",EN_EXP_PRESENCE="presentiel";
 let EN_GAME_MODE="a2",EN_GAME_PRESENCE="presentiel",EN_SELECTED_GAME="";let EN_PENDING_CHALLENGE_OPTS=null;
@@ -591,7 +591,7 @@ function startSelectedGame(){
  const partner=(document.getElementById("gamePartnerName")?.value||"").trim();
  const players=(document.getElementById("gameBandeNames")?.value||"").split(/[,\n]/).map(x=>x.trim()).filter(Boolean).slice(0,10);
  const dinguerieContext=(document.getElementById("gameDinguerieContext")?.value||"").trim();
- if(EN_GAME_MODE==="bande" && (players.length<3||players.length>10))return toast("La Bande doit compter de 3 à 10 personnes.");
+ if(EN_GAME_MODE==="bande" && (players.length<3||players.length>10))return toast("Le mode « À plusieurs » doit compter de 3 à 10 personnes.");
  if(EN_GAME_MODE==="a2" && !partner)return toast("Ajoute le prénom ou pseudo de l'autre personne.");
  if(EN_GAME_PRESENCE==="distance"){
    const exp=document.getElementById("inviteExp");if(exp)exp.value=name;
@@ -623,7 +623,7 @@ function startSelectedExperience(){
  const name=window.EN_SELECTED_EXPERIENCE;
  if(!name)return toast("Choisis d'abord un questionnaire.");
  const cfg=getExperienceModeConfig();
- if(cfg.mode==="bande" && (cfg.players.length<3||cfg.players.length>10))return toast("La Bande doit compter de 3 à 10 personnes.");
+ if(cfg.mode==="bande" && (cfg.players.length<3||cfg.players.length>10))return toast("Le mode « À plusieurs » doit compter de 3 à 10 personnes.");
  if(cfg.mode==="a2" && !cfg.partner)return toast("Ajoute le prénom ou pseudo de l'autre personne.");
  if(cfg.presence==="distance"){
    const exp=document.getElementById("inviteExp");if(exp)exp.value=name;
@@ -655,7 +655,7 @@ if(name==="Défis absurdes"){
  go("game");setupGameUI();renderQuestion();return;
 }
 diceMode=name==="Le dé ENTRE NOUS"||opts.dice===true;remoteMode=isRemoteInvite;currentTheme=null;diceHistory={};
-let questions=(Q[name]||Q["Se découvrir"]);if(PACK_EXP.has(name)&&!hasPack(name))questions=questions.slice(0,4);cur={name,qs:diceMode?[]:questions,i:0,a:[],theme:null,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||""};
+let questions=(Q[name]||Q["Se découvrir"]);if(!hasPremium()&&!hasPack(name))questions=questions.slice(0,6);cur={name,qs:diceMode?[]:questions,i:0,a:[],theme:null,inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||"",mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||""};
 S.sessions.unshift({name,status:"En cours",i:0,a:[],created:new Date().toISOString(),diceMode,remoteMode,partnerName:remotePartnerName,mode:opts.mode||"a2",presence:opts.presence||"presentiel",players:opts.players||[],turnIndex:0,dinguerieContext:opts.dinguerieContext||"",inviteCode:opts.inviteCode||new URLSearchParams(location.search).get("invite")||""});S.sessions=S.sessions.slice(0,30);save();trackEvent("game_started",{game:name,dice:!!diceMode,remote:!!remoteMode});go("game");setupGameUI();
 if(diceMode){question.textContent="Lance le dé pour choisir un thème.";round.textContent="🎲 Le dé ENTRE NOUS";meta.textContent="6 thèmes";bar.style.width="0%";answer.value="";return}
 renderQuestion();
@@ -927,7 +927,7 @@ async function createInvite(){
      created.push({name,partnerCode});
    }
    S.sessions=S.sessions.slice(0,30);save();renderProfile();
-   inviteOut.innerHTML=`<div class="panel"><span class="badge">🔒 Invitations privées</span><p class="small">Une invitation indépendante a été créée pour chaque personne. Chacun doit utiliser son propre lien et son code personnel.</p>${created.map(x=>{const p=S.partners.find(z=>z.code===code&&z.name===x.name);return `<div class="panel" style="margin:12px 0"><div class="remote">${esc(x.name)}</div><p class="small">🎮 ${esc(exp)}</p><div style="text-align:center"><div class="small">🔐 Code personnel</div><strong style="font-size:28px;letter-spacing:5px">${esc(x.partnerCode)}</strong></div><button class="btn" style="margin-top:10px" onclick="shareInvite('${esc(code)}','${esc(x.name)}')">📤 Partager pour ${esc(x.name)}</button></div>`}).join("")}</div>`;
+   inviteOut.innerHTML=`<div class="panel"><span class="badge">🔒 Invitations privées</span><p class="small">Une invitation indépendante a été créée pour chaque personne. Chacun doit utiliser son propre lien et son code personnel.</p>${created.map(x=>{const p=S.partners.find(z=>z.code===code&&z.name===x.name);return `<div class="panel" style="margin:12px 0"><div class="remote">${esc(x.name)}</div><p class="small">🎮 ${esc(exp)}</p><div style="text-align:center"><div class="small">🔐 Code personnel</div><strong style="font-size:28px;letter-spacing:5px">${esc(x.partnerCode)}</strong></div><button class="btn" style="margin-top:10px" onclick="shareInvite('${esc(code)}','${esc(x.name)}')">📤 Envoyer à ${esc(x.name)}</button></div>`}).join("")}</div>`;
    if(created.length===1)await shareInvite(code,created[0].name);
    else toast(`${created.length} invitations indépendantes prêtes à être envoyées 🔒❤️`);
  }catch(e){console.error("Création invitations privées:",e);const msg=e?.message||e?.details||e?.hint||"Erreur inconnue";toast("Impossible de créer les invitations privées : "+msg)}
@@ -945,7 +945,7 @@ async function shareInvite(code,nameOverride){
  const url=EN_APP_URL()+"?invite="+encodeURIComponent(token),from=S.profile?.name||"Quelqu’un";
  const text=`ENTRE NOUS ❤️
 
-${from} t’invite à jouer avec moi !
+Bonjour ${name} ❤️\n\n${from} t’invite personnellement à jouer avec moi !
 
 🎮 Activité : ${exp}
 🔗 Ouvre ce lien pour rejoindre la partie :
