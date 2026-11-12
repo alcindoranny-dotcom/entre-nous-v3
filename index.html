@@ -86,6 +86,26 @@ body.light .progress{background:#eee5e9}
 @media(max-width:420px){.nav{min-height:78px}.nav button{min-height:72px;font-size:15px}}
 
 /* ===== ENTRE NOUS V8 · SIGNATURE UI ===== */
+/* V8 FIX CONTRASTE · THEME CLAIR */
+body.light{background:#f7f1f5!important;color:#241923!important}
+body.light .en-v8-welcome{background:linear-gradient(125deg,#f5dce8,#fff8fb)!important;border-color:#c58ba8;color:#2b1825}
+body.light .en-v8-title,body.light .en-v8-copy,body.light .en-v8-kicker{color:#321b2b!important}
+body.light .en-v8-sectionhead h2{color:#4b2940!important}
+body.light .en-v8-sectionhead button{color:#8d416b!important}
+body.light .en-v8-feature{background:linear-gradient(150deg,#f5dce9,#e9c8da 70%)!important;border-color:#b87a9c;color:#351b2b!important}
+body.light .en-v8-feature b,body.light .en-v8-feature small{color:#351b2b!important}
+body.light .en-v8-mini-grid .card{background:linear-gradient(145deg,#fff,#f8eaf1)!important;border-color:#d9c4d0!important;color:#281a25!important}
+body.light .en-v8-mini-grid .card h3,body.light .en-v8-mini-grid .card p{color:#281a25!important}
+body.light .en-v8-wide{background:linear-gradient(110deg,#f3dce8,#ead0df)!important;border-color:#c58ba8!important;color:#321b2b!important}
+body.light .en-v8-wide small{color:#593b50!important}
+body.light .en-v8-adult{background:linear-gradient(110deg,#f5d7e2,#e9bdcf)!important;border-color:#b85e83!important}
+body.light .en-v8-note{color:#63495b!important}
+body.light .panel,body.light .card{color:#281a25}
+body.light .panel p,body.light .small{color:#574452}
+body.light .nav{background:rgba(255,255,255,.96)!important;color:#332431!important}
+body.light .nav button{color:#665565!important}
+body.light .nav button.active{color:#8d416b!important;background:#f8eaf1!important}
+
 :root{--bg:#10000f;--panel:#211020;--line:#70435f;--pink:#d99aaf;--ivory:#f3eee8;--violet:#76547f;--muted:#c9b5c5}
 body{background:radial-gradient(ellipse at 50% -10%,#51213f 0,#1b0c1b 42%,#0c080e 100%);font-family:Georgia,serif}
 .app{max-width:760px}
@@ -552,11 +572,11 @@ finish=function(){
 };
 
 const GAMES=[["🎲","Le dé ENTRE NOUS","Gratuit · 1 des 3 jeux inclus dans l’offre Free."],["🎯","Qui me connaît ?","Gratuit · Devinez les réponses de l’autre."],["🥂","Apéro","Gratuit · Questions légères, spontanées et amusantes."],["🤪","Dinguerie","Premium · Les défis et cartes qui font rire et sortir du cadre."],["📸","Souvenirs","Premium · Créer et conserver vos moments."],["✨","Notre prochain projet","Premium · Une idée chacun, un projet ensemble."],["🔺⭕🟦♥️","Quel est ton profil ?","Premium · 16 questions tactiles · profil dominant + secondaire."],["🎭","Défis absurdes","Premium · Choisis ton niveau : 🟢 Soft ou 🔴 Hard."],["🗺️","Lieux insolites","Premium · 10 lieux à révéler · 4 modes de jeu · 18+."],["🎲","Dé des envies","Premium · 5 manches · 6 faces · 18+."]];
-const EXP=[["🌿","Se découvrir","12 questions gratuites · comparaison des réponses."],["💞","Complicité","Premium · inclus dans l’offre à 4,99 €."],["👥","Amitié","Premium · inclus dans l’offre à 4,99 €."],["❤️","Amour","Premium · inclus dans l’offre à 4,99 €."],["👥","Bande","Premium · 3 à 10 personnes, à jouer ensemble."],["👀","Je te connais… tu aurais répondu ça !","Premium · 16 questions de prédiction."],["👨‍👩‍👧‍👦","Nos liens de fraternité","Premium · 32 questions pour les liens de fraternité."],["👨‍👩‍👧‍👦","Parent & Enfant","Premium · souvenirs, tendresse, défis et complicité."],["✨","Frissons","Premium · inclus dans l’offre à 4,99 € · réservé aux adultes."],["💑","Couple","4 questions gratuites · pack complet 20 questions à 1 €."],["💋","Sexfriend","4 questions gratuites · pack complet 20 questions à 1 €."],["🌶️","Libertin","4 questions gratuites · pack complet 20 questions à 1 €."],["⌛","10 ans ou plus","4 questions gratuites · pack complet 20 questions à 1 €."]];
+const EXP=[["🌿","Se découvrir","12 questions gratuites · comparaison des réponses."],["💞","Complicité","Premium · inclus dans l’offre à 4,99 €."],["👥","Amitié","Premium · inclus dans l’offre à 4,99 €."],["❤️","Amour","Premium · inclus dans l’offre à 4,99 €."],["👥","Bande","Premium · 3 à 10 personnes, à jouer ensemble."],["👀","Je te connais… tu aurais répondu ça !","Premium · 16 questions de prédiction."],["👨‍👩‍👧‍👦","Nos liens de fraternité","Premium · 32 questions pour les liens de fraternité."],["👨‍👩‍👧‍👦","Parent & Enfant","Premium · souvenirs, tendresse, défis et complicité."],["✨ +18","Frissons","Premium · univers adulte : désir, curiosité et liberté de parole."],["💑","Couple","4 questions gratuites · pack complet 20 questions à 1 €."],["💋","Sexfriend","4 questions gratuites · pack complet 20 questions à 1 €."],["⌛","10 ans ou plus","4 questions gratuites · pack complet 20 questions à 1 €."]];
 const FREE_GAMES=new Set(["Le dé ENTRE NOUS","Qui me connaît ?","Apéro"]);
 const PREMIUM_GAMES=new Set(["Dinguerie","Souvenirs","Notre prochain projet","Quel est ton profil ?","Défis absurdes"]);
 const PREMIUM_EXP=new Set(["Complicité","Amitié","Amour","Bande","Je te connais… tu aurais répondu ça !","Nos liens de fraternité","Parent & Enfant","Frissons"]);
-const PACK_EXP=new Set(["Couple","Sexfriend","Libertin","10 ans ou plus"]);
+const PACK_EXP=new Set(["Couple","Sexfriend","10 ans ou plus"]);
 const PACK_PRICE="1 €"; const PREMIUM_PRICE="4,99 €";
 
 let S=JSON.parse(localStorage.getItem("EN_MASTER")||'{"profile":{},"sessions":[],"memories":[],"partners":[],"premium":false}');
@@ -1151,8 +1171,8 @@ const shared=params.get("share");if(shared){setTimeout(()=>handleSharedQuestion(
  ];
  Q["Lieux insolites"]=lieux;
  Q["Dé des envies"]=Array.from({length:5},(_,i)=>"Manche "+(i+1)+" · "+envies[Math.floor(Math.random()*envies.length)]);
- Q["Frissons"]=Q["Piment"]||[];
- delete Q["Piment"];
+ Q["Frissons"]=[...(Q["Piment"]||[]),...(Q["Libertin"]||[])];
+ delete Q["Piment"]; delete Q["Libertin"];
  window.startGame=function(name,opts={}){
    if(name==="Lieux insolites"||name==="Dé des envies"||name==="Frissons"){
      const ok=confirm("Espace réservé aux adultes (18+). En continuant, tu confirmes être majeur(e). Toute action doit rester libre, réciproque et consentie. Chacun peut passer à tout moment. Continuer ?");
@@ -1176,7 +1196,7 @@ const shared=params.get("share");if(shared){setTimeout(()=>handleSharedQuestion(
  function renderHomeV8(){
    const home=document.getElementById("home");if(!home||!Array.isArray(GAMES)||!Array.isArray(EXP))return;
    const expCards=EXP.map(e=>'<div class="card" onclick="openExperience(\''+e[1].replace(/'/g,"\\'")+'\')"><div>'+e[0]+'</div><h3>'+e[1]+'</h3><p>'+e[2]+'</p></div>').join("");
-   const gameCards=GAMES.map(g=>'<div class="card" onclick="openGame(\''+g[1].replace(/'/g,"\\'")+'\')"><div>'+g[0]+'</div><h3>'+g[1]+'</h3><p>'+g[2]+'</p></div>').join("");
+   const standardGames=GAMES.filter(g=>!["Lieux insolites","Dé des envies"].includes(g[1]));\n   const adultGames=GAMES.filter(g=>["Lieux insolites","Dé des envies"].includes(g[1]));\n   const gameCards=standardGames.map(g=>'<div class="card" onclick="openGame(\''+g[1].replace(/'/g,"\\'")+'\')"><div>'+g[0]+'</div><h3>'+g[1]+'</h3><p>'+g[2]+'</p></div>').join("");
    home.innerHTML='<div class="en-v8-home">'+
     '<section class="en-v8-welcome"><div class="en-v8-kicker">L’espace où les liens se créent</div><h1 class="en-v8-title">Et si on se <em style="color:#e3a0bd">découvrait</em> autrement ?</h1><p class="en-v8-copy">Des jeux, des questions et des moments à partager. À deux, entre amis ou en famille.</p><button class="btn" onclick="go(\'play\')">Commencer à jouer&nbsp; ↗</button> <button class="btn ghost" onclick="go(\'conceptInfo\')">Découvrir</button></section>'+
     '<section class="en-v8-section"><div class="en-v8-sectionhead"><h2>On fait quoi ?</h2><button onclick="go(\'experience\')">Tout découvrir ↗</button></div><div class="en-v8-featuregrid">'+
@@ -1184,7 +1204,7 @@ const shared=params.get("share");if(shared){setTimeout(()=>handleSharedQuestion(
     '<section class="en-v8-section"><div class="en-v8-sectionhead"><h2>Questionnaires</h2><button onclick="go(\'experience\')">Tout voir →</button></div><div class="en-v8-mini-grid">'+expCards+'</div></section>'+
     '<section class="en-v8-section"><div class="en-v8-sectionhead"><h2>Jeux à la une</h2><button onclick="go(\'play\')">Tout voir →</button></div><div class="en-v8-mini-grid">'+gameCards+'</div></section>'+
     '<section class="en-v8-section"><button class="en-v8-wide" onclick="go(\'play\')"><span class="ico">🎨</span><span><b>Crée ton univers</b><br><small>Des activités gratuites à personnaliser.</small></span><strong style="margin-left:auto;font-size:30px;color:#e9a5c3">＋</strong></button></section>'+
-    '<section class="en-v8-section"><button class="en-v8-wide en-v8-adult" onclick="go(\'play\')"><span class="ico">🌶️</span><span><b>PIMENT · Espace 18+</b><br><small>Frissons · Lieux insolites · Dé des envies</small></span><strong style="margin-left:auto">18+</strong></button><p class="en-v8-note">Accès adulte réservé aux personnes majeures. Consentement mutuel et droit de passer à chaque étape.</p></section>'+
+    '<section class="en-v8-section"><button class="en-v8-wide en-v8-adult" onclick="go(\'play\')"><span class="ico">🌶️</span><span><b>CALIENTE · Espace +18</b><br><small>Les jeux réservés aux adultes</small></span><strong style="margin-left:auto">+18</strong></button><div class="en-v8-mini-grid" style="margin-top:12px">'+adultGames.map(g=>'<div class="card" onclick="openGame(\''+g[1]+'\')"><div>'+g[0]+'</div><h3>'+g[1]+'</h3><p>'+g[2]+'</p></div>').join('')+'</div><p class="en-v8-note">Accès adulte réservé aux personnes majeures. Consentement mutuel et droit de passer à chaque étape.</p></section>'+
    '</div>';
  }
  window.addEventListener("load",()=>{renderHomeV8();renderCards();});
