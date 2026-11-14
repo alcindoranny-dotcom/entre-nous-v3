@@ -220,7 +220,7 @@ body{background:radial-gradient(ellipse at 50% -10%,#51213f 0,#1b0c1b 42%,#0c080
 <div class="question" id="question"></div>
 <textarea id="answer" class="textarea" placeholder="Ta réponse…"></textarea>
 <div class="actions"><button class="btn ghost" onclick="skip()">Je passe</button><button class="btn ghost" onclick="discuss()">On en rediscute</button></div>
-<div class="actions" style="margin-top:9px"><button class="btn" onclick="saveAnswer()">Enregistrer ma réponse</button><button class="btn wa" onclick="shareCurrentQuestion()">📤 Partager</button></div><button class="btn ghost" id="ourAnswersBtn" style="margin-top:9px" onclick="showOurAnswers()">💞 Nos réponses</button><button class="btn ghost" style="margin-top:9px" onclick="openMemory()">💾 Garder un souvenir maintenant</button>
+<div class="actions" style="margin-top:9px"><button class="btn" onclick="saveAnswer()">Enregistrer ma réponse</button><button class="btn wa" onclick="shareCurrentQuestion()">📤 Partager</button></div><div class="actions" style="margin-top:9px"><button class="btn ghost" id="ourAnswersBtn" onclick="showOurAnswers()">💞 Nos réponses</button><button class="btn wa" id="shareOurAnswersBtn" onclick="shareOurAnswers()">📤 Partager nos réponses</button></div><button class="btn ghost" style="margin-top:9px" onclick="openMemory()">💾 Garder un souvenir maintenant</button>
 </section>
 
 <section id="finish" class="screen"><button class="back btn ghost" onclick="backToGame()">← Retour à la partie</button><div class="hero"><div class="eyebrow" id="finishEyebrow">Souvenir</div><h1 id="finishTitle">Ce moment reste entre nous.</h1><p class="p">Tu peux enregistrer un souvenir à tout moment, même si toutes les questions ne sont pas terminées.</p><input id="memoryTitle" class="input" placeholder="Titre du moment (ex. Conversation à reprendre)" style="margin-bottom:9px"><textarea id="note" class="textarea" placeholder="Une note, un souvenir, une phrase à garder…"></textarea><button class="btn" id="saveMemoryBtn" onclick="saveMemory()">Enregistrer le souvenir ❤️</button><button class="btn ghost" style="margin-top:9px" onclick="shareRecap()">Partager le récapitulatif</button><button class="btn ghost" style="margin-top:9px" onclick="backToGame()">← Revenir à la question</button></div></section>
@@ -1071,23 +1071,42 @@ async function createShareToken(payload){
  if(error)throw error;
  return (Array.isArray(data)?data[0]:data)?.token||token;
 }
+async function fetchOurAnswers(){
+ if(!EN_GAME?.id)throw new Error("Cette partie n'est pas encore synchronisée.");
+ const [{data:answers,error:ae},{data:participants,error:pe}]=await Promise.all([
+  sb.from("answers").select("participant_id,question_index,question,answer,discussed").eq("game_id",EN_GAME.id).order("question_index",{ascending:true}),
+  sb.from("participants").select("id,name,role").eq("game_id",EN_GAME.id)
+ ]);
+ if(ae)throw ae;if(pe)throw pe;
+ const names=new Map((participants||[]).map(p=>[p.id,p.name||"Participant"]));
+ return (answers||[]).map(a=>({question_index:a.question_index,question:a.question,answer:a.answer||"",discussed:!!a.discussed,from:names.get(a.participant_id)||"Participant"}));
+}
+function renderOurAnswers(items,containerId="enOurAnswers"){
+ let box=document.getElementById(containerId);if(box)box.remove();
+ box=document.createElement("div");box.id=containerId;box.style.cssText="position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.9);backdrop-filter:blur(10px)";
+ const grouped=new Map();for(const row of items){const k=Number(row.question_index);if(!grouped.has(k))grouped.set(k,{question:row.question||"Question",answers:[],discussed:false});const g=grouped.get(k);g.answers.push(row);g.discussed=g.discussed||!!row.discussed;}
+ const content=[...grouped.entries()].sort((a,b)=>a[0]-b[0]).map(([index,g])=>`<div class="panel" style="margin:12px 0"><div class="small">Carte ${index+1}${g.discussed?' · 💬 À rediscuter':''}</div><h3>${esc(g.question)}</h3>${g.answers.map(a=>`<div style="margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:12px"><b>${esc(a.from)}</b><p style="white-space:pre-wrap;margin:6px 0 0">${esc(a.answer||"Aucune réponse écrite")}</p>${a.discussed?'<span class="badge">On en rediscute</span>':""}</div>`).join("")}</div>`).join("")||'<p class="small">Aucune réponse synchronisée pour le moment.</p>';
+ box.innerHTML=`<div style="width:min(620px,100%);max-height:88vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:22px"><div class="eyebrow">ENTRE NOUS</div><h2>💞 Nos réponses</h2><p class="small">Les réponses enregistrées dans cette partie.</p>${content}<button class="btn" style="width:100%;margin-top:12px" onclick="document.getElementById('${containerId}')?.remove()">Fermer</button></div>`;
+ document.body.appendChild(box);
+}
 async function showOurAnswers(){
- if(!EN_GAME?.id)return toast("Cette partie n'est pas encore synchronisée.");
  const btn=document.getElementById("ourAnswersBtn");if(btn){btn.disabled=true;btn.textContent="Chargement…";}
- try{
-  const {data,error}=await sb.from("answers").select("question_index,question,answer,discussed,participants(name,role)").eq("game_id",EN_GAME.id).order("question_index",{ascending:true});
-  if(error)throw error;
-  const rows=Array.isArray(data)?data:[];
-  const grouped=new Map();
-  for(const row of rows){const k=Number(row.question_index);if(!grouped.has(k))grouped.set(k,{question:row.question||"Question",answers:[],discussed:false});const g=grouped.get(k);g.answers.push({name:row.participants?.name||"Participant",answer:row.answer||"",discussed:!!row.discussed});g.discussed=g.discussed||!!row.discussed;}
-  const items=[...grouped.entries()].sort((a,b)=>a[0]-b[0]);
-  let box=document.getElementById("enOurAnswers");if(box)box.remove();
-  box=document.createElement("div");box.id="enOurAnswers";box.style.cssText="position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.9);backdrop-filter:blur(10px)";
-  const content=items.length?items.map(([index,g])=>`<div class="panel" style="margin:12px 0"><div class="small">Carte ${index+1}${g.discussed?' · 💬 À rediscuter':''}</div><h3>${esc(g.question)}</h3>${g.answers.map(a=>`<div style="margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:12px"><b>${esc(a.name)}</b><p style="white-space:pre-wrap;margin:6px 0 0">${esc(a.answer||"Aucune réponse écrite")}</p>${a.discussed?'<span class="badge">On en rediscute</span>':""}</div>`).join("")}</div>`).join(""):'<p class="small">Aucune réponse synchronisée pour le moment. Les réponses apparaîtront ici dès qu’elles seront enregistrées.</p>';
-  box.innerHTML=`<div style="width:min(620px,100%);max-height:88vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:22px"><div class="eyebrow">ENTRE NOUS</div><h2>💞 Nos réponses</h2><p class="small">Les réponses enregistrées dans cette partie.</p>${content}<button class="btn" style="width:100%;margin-top:12px" onclick="document.getElementById('enOurAnswers')?.remove()">Fermer</button></div>`;
-  document.body.appendChild(box);
- }catch(e){console.error("Chargement des réponses:",e);toast("Impossible de charger les réponses pour le moment.");}
+ try{renderOurAnswers(await fetchOurAnswers());}
+ catch(e){console.error("Chargement des réponses:",e);toast(e?.message||"Impossible de charger les réponses pour le moment.");}
  finally{if(btn){btn.disabled=false;btn.textContent="💞 Nos réponses";}}
+}
+async function shareOurAnswers(){
+ const btn=document.getElementById("shareOurAnswersBtn");if(btn){btn.disabled=true;btn.textContent="Préparation…";}
+ try{
+  const answers=await fetchOurAnswers();
+  if(!answers.length)throw new Error("Aucune réponse n'a encore été synchronisée.");
+  const token=await createShareToken({type:"answers",game:EN_GAME.experience||cur?.name||"ENTRE NOUS",answers});
+  const url=EN_PUBLIC_BASE_URL()+"?share="+encodeURIComponent(token);
+  const message=`ENTRE NOUS ❤️\n\n💞 Nos réponses — ${EN_GAME.experience||cur?.name||"ENTRE NOUS"}\n\n👉 Consulter les réponses :\n${url}\n\nToute personne disposant de ce lien pourra consulter ce récapitulatif.`;
+  if(navigator.share){try{await navigator.share({title:"ENTRE NOUS — Nos réponses",text:message});return}catch(err){if(err?.name==="AbortError")return}}
+  try{await navigator.clipboard.writeText(message);toast("Lien de partage copié 📋❤️");}catch(_){prompt("Copie ce lien pour le partager :",message)}
+ }catch(e){console.error("Partage des réponses:",e);toast(e?.message||"Impossible de préparer le partage.");}
+ finally{if(btn){btn.disabled=false;btn.textContent="📤 Partager nos réponses";}}
 }
 async function shareCurrentQuestion(){
  if(!cur||!cur.qs[cur.i])return toast("Lance le dé ou affiche une question.");
@@ -1107,6 +1126,15 @@ async function handleSharedQuestion(){
    const {data,error}=await sb.rpc('get_share_link',{p_token:raw});
    if(error)throw error;
    const row=Array.isArray(data)?data[0]:data,d=row?.payload||{};
+   if(d.type==="answers"){
+     const rows=Array.isArray(d.answers)?d.answers:[];
+     const box=document.createElement("div");box.id="enSharedBox";
+     box.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.88);backdrop-filter:blur(10px)";
+     const grouped=new Map();for(const a of rows){const k=Number(a.question_index);if(!grouped.has(k))grouped.set(k,{question:a.question||"Question",answers:[],discussed:false});const g=grouped.get(k);g.answers.push(a);g.discussed=g.discussed||!!a.discussed;}
+     const content=[...grouped.entries()].sort((a,b)=>a[0]-b[0]).map(([i,g])=>`<div class="panel"><div class="small">Carte ${i+1}${g.discussed?' · 💬 À rediscuter':''}</div><h3>${esc(g.question)}</h3>${g.answers.map(a=>`<div class="panel"><b>${esc(a.from||"Participant")}</b><p style="white-space:pre-wrap">${esc(a.answer||"Aucune réponse écrite")}</p>${a.discussed?'<span class="badge">On en rediscute</span>':""}</div>`).join("")}</div>`).join("")||'<p class="small">Aucune réponse disponible.</p>';
+     box.innerHTML=`<div style="width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:24px"><div class="eyebrow">ENTRE NOUS</div><h2>💞 Nos réponses</h2><p class="small">🎮 ${esc(d.game||"ENTRE NOUS")}</p>${content}<p class="fine">Toute personne disposant de ce lien peut consulter ce récapitulatif.</p><button class="btn" onclick="this.closest('#enSharedBox').remove();history.replaceState({},document.title,EN_APP_URL())">Fermer</button></div>`;
+     document.body.appendChild(box);return;
+   }
    if(d.type==="recap"){
      const box=document.createElement("div");box.id="enSharedBox";
      box.style.cssText="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(0,0,0,.88);backdrop-filter:blur(10px)";
