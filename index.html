@@ -183,7 +183,52 @@ body{background:radial-gradient(ellipse at 50% -10%,#51213f 0,#1b0c1b 42%,#0c080
 </div>
 <div class="panel"><b>📂 Mes parties</b><p class="small">Retrouve une partie en cours sans repartir de zéro.</p><button class="btn ghost" onclick="go('sessions')">Reprendre une partie</button></div><div class="grid" id="gameCards"></div></section>
 
-<section id="conceptInfo" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button><div class="hero"><h1>Des questions qui rapprochent.<br>Des moments qui restent.</h1><p class="p">ENTRE NOUS, c’est une expérience pensée pour jouer, échanger, se découvrir et créer de vrais souvenirs — à deux, entre amis ou à distance.</p></div><div class="panel"><b>✨ Offre Free</b><p class="small"><b>Se découvrir · 12 questions · 3 jeux.</b> Les univers spécialisés <b>Couple, Libertin, Sexfriend et 10 ans ou plus</b> proposent chacun <b>4 questions gratuites</b> pour les découvrir.</p></div><div class="panel"><div class="badge">✨ Premium · 4,99 €</div><p class="small">Débloque <b>Amour, Amitié, Piment et Complicité</b>, ainsi que <b>4 jeux supplémentaires</b>.</p><button class="btn ghost" onclick="unlockPremium()">Débloquer Premium · 4,99 €</button></div><div class="panel"><div class="badge">🎁 Packs spécialisés · 1 € chacun</div><p class="small">Chaque pack spécialisé contient <b>20 questions</b> : Couple, Libertin, Sexfriend ou 10 ans ou plus.</p><div class="actions" style="flex-wrap:wrap;margin-top:10px"><button class="btn ghost" onclick="unlockPack('Couple')">Couple · 1 €</button><button class="btn ghost" onclick="unlockPack('Libertin')">Libertin · 1 €</button><button class="btn ghost" onclick="unlockPack('Sexfriend')">Sexfriend · 1 €</button><button class="btn ghost" onclick="unlockPack('10 ans ou plus')">10 ans ou plus · 1 €</button><button class="btn" onclick="unlockSpecializedBundle()">🎁 Les 4 packs · 4 €</button></div><p class="small" style="margin-top:8px">Le pack complet débloque les <b>4 questionnaires spécialisés</b> en un seul paiement : <b>80 questions</b> au total.</p></div><div class="panel"><b>🔎 À venir</b><p class="small">De nouveaux questionnaires et jeux enrichiront ENTRE NOUS, notamment des concepts LGBTQIA+ et d'autres univers.</p></div></section>
+<section id="conceptInfo" class="screen">
+<button class="back btn ghost" onclick="goBackTo('home')">← Retour</button>
+<div style="padding:8px 0 20px;text-align:center">
+ <div class="eyebrow" style="letter-spacing:3px;color:#e6a0bd">ENTRE NOUS · LES OFFRES</div>
+ <h1 style="font-family:Georgia,serif;font-size:clamp(30px,7vw,46px);line-height:1.08;margin:12px 0;color:var(--text)">Plus de jeux.<br><span style="color:#d88bad">Plus de liens.</span></h1>
+ <p class="p" style="max-width:520px;margin:0 auto">Choisis la formule qui te ressemble : profite de toute l’expérience ou débloque seulement les questionnaires qui t’attirent.</p>
+</div>
+<div class="panel" style="position:relative;overflow:hidden;border:1px solid rgba(224,157,190,.65);background:linear-gradient(145deg,rgba(100,43,82,.75),rgba(35,17,34,.96));padding:22px">
+ <div class="eyebrow" style="color:#f1b7d0;letter-spacing:2px">✨ L’expérience complète</div>
+ <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin:8px 0"><strong style="font: bold 38px Georgia,serif;color:#fff">4,99 €</strong><span class="small" style="color:#f2dce7">/ mois</span></div>
+ <p style="color:#f6eaf0;margin:0 0 14px">L’expérience ENTRE NOUS sans limites : jeux, univers relationnels et contenus Premium réunis.</p>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0">
+  <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.08)">💞 <b>Complicité, Amour, Amitié</b><div class="small">Les expériences à partager</div></div>
+  <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.08)">🎲 <b>Jeux Premium</b><div class="small">Défis, souvenirs et découvertes</div></div>
+  <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.08)">💬 <b>Nos réponses</b><div class="small">Retrouver et comparer vos échanges</div></div>
+  <div style="padding:10px;border-radius:12px;background:rgba(255,255,255,.08)">🌸 <b>Nouveaux contenus</b><div class="small">Des saisons et expériences enrichies</div></div>
+ </div>
+ <button class="btn" style="width:100%;background:linear-gradient(90deg,#e6a0bd,#bd6c9c);color:#2b1024;border:0;font-weight:800" onclick="unlockPremium()">Découvrir Premium · 4,99 € / mois</button>
+ <p class="small" style="text-align:center;color:#f0dce7;margin:10px 0 0">Tous les questionnaires spécialisés sont inclus avec Premium.</p>
+</div>
+<div style="text-align:center;padding:24px 4px 10px">
+ <div class="eyebrow" style="color:#e6a0bd;letter-spacing:2px">À LA CARTE</div>
+ <h2 style="font: bold 28px Georgia,serif;margin:8px 0">Envie d’un seul univers ?</h2>
+ <p class="small" style="max-width:480px;margin:0 auto">Pas besoin de t’abonner. Découvre 4 questions gratuitement, puis débloque le questionnaire complet pour 1 €.</p>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+ <div class="panel" style="margin:0;padding:16px;border:1px solid rgba(222,151,184,.35)">
+  <div style="font-size:30px">✨ +18</div><h3 style="margin:8px 0 5px">FRISSONS</h3><p class="small" style="min-height:56px">PIMENT & LIBERTIN : désir, curiosité et liberté de parole.</p><div style="font: bold 23px Georgia,serif;color:#e6a0bd">1 €</div><p class="small">4 questions offertes · accès complet à l’achat</p><button class="btn ghost" style="width:100%" onclick="unlockPack('Frissons')">Découvrir</button>
+ </div>
+ <div class="panel" style="margin:0;padding:16px;border:1px solid rgba(222,151,184,.35)">
+  <div style="font-size:30px">💑</div><h3 style="margin:8px 0 5px">COUPLE</h3><p class="small" style="min-height:56px">Mieux se comprendre et faire grandir votre complicité.</p><div style="font: bold 23px Georgia,serif;color:#e6a0bd">1 €</div><p class="small">4 questions offertes · accès complet à l’achat</p><button class="btn ghost" style="width:100%" onclick="unlockPack('Couple')">Découvrir</button>
+ </div>
+ <div class="panel" style="margin:0;padding:16px;border:1px solid rgba(222,151,184,.35)">
+  <div style="font-size:30px">💋</div><h3 style="margin:8px 0 5px">SEX FRIEND</h3><p class="small" style="min-height:56px">Parler des envies, des attentes et des limites.</p><div style="font: bold 23px Georgia,serif;color:#e6a0bd">1 €</div><p class="small">4 questions offertes · accès complet à l’achat</p><button class="btn ghost" style="width:100%" onclick="unlockPack('Sexfriend')">Découvrir</button>
+ </div>
+ <div class="panel" style="margin:0;padding:16px;border:1px solid rgba(222,151,184,.35)">
+  <div style="font-size:30px">⌛</div><h3 style="margin:8px 0 5px">10 ANS OU PLUS</h3><p class="small" style="min-height:56px">Revisiter votre histoire et imaginer la suite.</p><div style="font: bold 23px Georgia,serif;color:#e6a0bd">1 €</div><p class="small">4 questions offertes · accès complet à l’achat</p><button class="btn ghost" style="width:100%" onclick="unlockPack('10 ans ou plus')">Découvrir</button>
+ </div>
+</div>
+<div class="panel" style="margin-top:16px;text-align:center">
+ <b>🌿 Commencer gratuitement</b>
+ <p class="small">12 questions pour Se découvrir et 3 jeux gratuits pour faire connaissance avec ENTRE NOUS.</p>
+ <button class="btn ghost" onclick="go('play')">Explorer l’offre Free</button>
+</div>
+<p class="fine" style="text-align:center;margin:16px 0">FRISSONS est réservé aux adultes. L’accès à cet univers est soumis à une vérification d’âge.</p>
+</section>
 
 <section id="experience" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button><div class="hero"><div class="eyebrow">Questionnaires</div><h1>Mon expérience.</h1><p class="p">Choisis un thème et retrouve les questionnaires ENTRE NOUS.</p></div><div class="panel en-mode-panel" id="experienceModePanel">
 <b>🎮 Comment joue-t-on ?</b>
@@ -572,11 +617,11 @@ finish=function(){
 };
 
 const GAMES=[["🎲","Le dé ENTRE NOUS","Gratuit · 1 des 3 jeux inclus dans l’offre Free."],["🎯","Qui me connaît ?","Gratuit · Devinez les réponses de l’autre."],["🥂","Apéro","Gratuit · Questions légères, spontanées et amusantes."],["🤪","Dinguerie","Premium · Les défis et cartes qui font rire et sortir du cadre."],["📸","Souvenirs","Premium · Créer et conserver vos moments."],["✨","Notre prochain projet","Premium · Une idée chacun, un projet ensemble."],["🔺⭕🟦♥️","Quel est ton profil ?","Premium · 16 questions tactiles · profil dominant + secondaire."],["🎭","Défis absurdes","Premium · Choisis ton niveau : 🟢 Soft ou 🔴 Hard."],["🗺️","Lieux insolites","Premium · 10 lieux à révéler · 4 modes de jeu · 18+."],["🎲","Dé des envies","Premium · 5 manches · 6 faces · 18+."]];
-const EXP=[["🌿","Se découvrir","12 questions gratuites · comparaison des réponses."],["💞","Complicité","Premium · inclus dans l’offre à 4,99 €."],["👥","Amitié","Premium · inclus dans l’offre à 4,99 €."],["❤️","Amour","Premium · inclus dans l’offre à 4,99 €."],["👥","Bande","Premium · 3 à 10 personnes, à jouer ensemble."],["👀","Je te connais… tu aurais répondu ça !","Premium · 16 questions de prédiction."],["👨‍👩‍👧‍👦","Nos liens de fraternité","Premium · 32 questions pour les liens de fraternité."],["👨‍👩‍👧‍👦","Parent & Enfant","Premium · souvenirs, tendresse, défis et complicité."],["✨ +18","Frissons","Premium · univers adulte : désir, curiosité et liberté de parole."],["💑","Couple","4 questions gratuites · pack complet 20 questions à 1 €."],["💋","Sexfriend","4 questions gratuites · pack complet 20 questions à 1 €."],["⌛","10 ans ou plus","4 questions gratuites · pack complet 20 questions à 1 €."]];
+const EXP=[["🌿","Se découvrir","12 questions gratuites · comparaison des réponses."],["💞","Complicité","Premium · inclus dans l’offre à 4,99 €."],["👥","Amitié","Premium · inclus dans l’offre à 4,99 €."],["❤️","Amour","Premium · inclus dans l’offre à 4,99 €."],["👥","Bande","Premium · 3 à 10 personnes, à jouer ensemble."],["👀","Je te connais… tu aurais répondu ça !","Premium · 16 questions de prédiction."],["👨‍👩‍👧‍👦","Nos liens de fraternité","Premium · 32 questions pour les liens de fraternité."],["👨‍👩‍👧‍👦","Parent & Enfant","Premium · souvenirs, tendresse, défis et complicité."],["✨ +18","Frissons","4 questions offertes · PIMENT & LIBERTIN · accès complet à 1 €."],["💑","Couple","4 questions gratuites · pack complet 20 questions à 1 €."],["💋","Sexfriend","4 questions gratuites · pack complet 20 questions à 1 €."],["⌛","10 ans ou plus","4 questions gratuites · pack complet 20 questions à 1 €."]];
 const FREE_GAMES=new Set(["Le dé ENTRE NOUS","Qui me connaît ?","Apéro"]);
 const PREMIUM_GAMES=new Set(["Dinguerie","Souvenirs","Notre prochain projet","Quel est ton profil ?","Défis absurdes"]);
-const PREMIUM_EXP=new Set(["Complicité","Amitié","Amour","Bande","Je te connais… tu aurais répondu ça !","Nos liens de fraternité","Parent & Enfant","Frissons"]);
-const PACK_EXP=new Set(["Couple","Sexfriend","10 ans ou plus"]);
+const PREMIUM_EXP=new Set(["Complicité","Amitié","Amour","Bande","Je te connais… tu aurais répondu ça !","Nos liens de fraternité","Parent & Enfant"]);
+const PACK_EXP=new Set(["Frissons","Couple","Sexfriend","10 ans ou plus"]);
 const PACK_PRICE="1 €"; const PREMIUM_PRICE="4,99 €";
 
 let S=JSON.parse(localStorage.getItem("EN_MASTER")||'{"profile":{},"sessions":[],"memories":[],"partners":[],"premium":false}');
