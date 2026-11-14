@@ -232,16 +232,6 @@ body{background:radial-gradient(ellipse at 50% -10%,#51213f 0,#1b0c1b 42%,#0c080
 
 <section id="experience" class="screen"><button class="back btn ghost" onclick="goBackTo('home')">← Retour</button>
 <div class="hero"><div class="eyebrow">QUESTIONNAIRES · EXPÉRIENCES</div><h1>Mon expérience.</h1><p class="p">Des univers pour se découvrir, rire, échanger et créer des souvenirs.</p></div>
-<div class="panel" style="margin:0 0 18px;padding:20px;border:1px solid rgba(226,157,190,.7);border-radius:22px;background:linear-gradient(135deg,rgba(112,48,91,.9),rgba(39,19,39,.98));box-shadow:0 12px 32px rgba(0,0,0,.22)">
- <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="eyebrow" style="color:#f0b8d0;letter-spacing:2px">✨ L’EXPÉRIENCE COMPLÈTE</span><span style="border:1px solid rgba(255,255,255,.35);border-radius:99px;padding:5px 10px;color:#ffe5ef;font-size:12px">PREMIUM</span></div>
- <div style="display:flex;align-items:baseline;gap:7px;margin:8px 0 4px"><strong style="font: bold 38px Georgia,serif;color:#fff">4,99 €</strong><span style="color:#f2dce7">/ mois</span></div>
- <p style="color:#f6eaf0;margin:0 0 14px">Tous les univers Premium et les jeux exclusifs dans une seule formule.</p>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 16px;color:#fff;font-size:13px">
-  <span>💞 Complicité · Amour · Amitié</span><span>🎲 Jeux Premium</span><span>👥 Expériences à plusieurs</span><span>🌸 Contenus enrichis</span>
- </div>
- <button class="btn" style="width:100%;background:linear-gradient(90deg,#e7a5c0,#c16d9e);color:#321629;border:0;font-weight:800" onclick="unlockPremium()">Débloquer l’expérience Premium</button>
- <p style="text-align:center;color:#f1dce7;font-size:11px;margin:9px 0 0">Ou choisis un questionnaire à l’unité pour 1 €.</p>
-</div>
 <div class="panel en-mode-panel" id="experienceModePanel">
 <b>🎮 Comment joue-t-on ?</b>
 <p class="small">Choisis le format de ta partie.</p>
@@ -261,7 +251,13 @@ body{background:radial-gradient(ellipse at 50% -10%,#51213f 0,#1b0c1b 42%,#0c080
 </div>
 <button class="btn" style="margin-top:12px" type="button" onclick="startSelectedExperience()">Commencer la partie ❤️</button>
 </div>
-<div class="grid" id="experienceCards"></div></section>
+<div class="experience-free-wrap" style="margin:16px 0"><div class="eyebrow">POUR COMMENCER</div><div id="experienceFreeCard"></div></div>
+<div class="panel" style="margin:18px 0;padding:16px;border:1px solid rgba(226,157,190,.65);border-radius:24px;background:linear-gradient(145deg,rgba(93,43,79,.56),rgba(30,16,30,.92));box-shadow:0 10px 28px rgba(0,0,0,.18)">
+ <div style="text-align:center;padding:6px 4px 14px"><div class="eyebrow" style="color:#efb7cf;letter-spacing:2px">✨ L’EXPÉRIENCE PREMIUM</div><h2 style="font: bold 27px Georgia,serif;margin:8px 0">Tout ce qui vous rapproche.</h2><div style="display:flex;justify-content:center;align-items:baseline;gap:6px"><strong style="font: bold 30px Georgia,serif;color:#edb0ca">4,99 €</strong><span class="small">/ mois</span></div><p class="small" style="margin:6px 0 12px">Débloque tous ces univers et les jeux Premium.</p><button class="btn" style="width:100%;background:linear-gradient(90deg,#e7a5c0,#c16d9e);color:#321629;border:0;font-weight:800" onclick="unlockPremium()">Choisir l’abonnement Premium</button></div>
+ <div class="grid" id="experiencePremiumCards" style="margin-top:14px"></div>
+</div>
+<div style="margin:24px 0 10px"><div class="eyebrow">À LA CARTE</div><h2 style="font: bold 25px Georgia,serif;margin:7px 0">Choisis ton questionnaire</h2><p class="small">4 questions offertes, puis 1 € pour débloquer les 20 questions complètes.</p><div class="grid" id="experiencePackCards"></div></div>
+</section>
 
 <section id="game" class="screen">
 <button class="back btn ghost" onclick="quit()">← Retour / enregistrer</button>
@@ -683,7 +679,13 @@ function hasPremium(){return isDemoMode() || !!S.premium || !!S.profile?.premium
 function hasPack(name){return hasPremium() || !!S.packs?.includes(name)}
 function canOpenGame(name){return FREE_GAMES.has(name)||hasPremium()}
 function canOpenExperience(name){return name==="Se découvrir" || (PREMIUM_EXP.has(name)?hasPremium():PACK_EXP.has(name)?hasPack(name):true)}
-function renderCards(){gameCards.innerHTML=GAMES.map(g=>{const locked=!canOpenGame(g[1]);return `<div class="card" onclick="openGame('${esc(g[1])}')"><div style="font-size:28px">${g[0]}</div><h3>${g[1]} ${locked?"🔒":""}</h3><p>${g[2]}</p></div>`}).join("");experienceCards.innerHTML=EXP.map(e=>{const locked=!canOpenExperience(e[1]);const action=locked?(PREMIUM_EXP.has(e[1])?`unlockPremium()`:`unlockPack('${esc(e[1])}')`):`openExperience('${esc(e[1])}')`;return `<div class="card" onclick="${action}"><div style="font-size:28px">${e[0]}</div><h3>${e[1]} ${locked?"🔒":""}</h3><p>${e[2]}</p></div>`}).join("")}
+function renderCards(){
+ gameCards.innerHTML=GAMES.map(g=>{const locked=!canOpenGame(g[1]);return \`<div class="card" onclick="openGame('\${esc(g[1])}')"><div style="font-size:28px">\${g[0]}</div><h3>\${g[1]} \${locked?"🔒":""}</h3><p>\${g[2]}</p></div>\`}).join("");
+ const card=e=>{const locked=!canOpenExperience(e[1]);const action=locked?(PREMIUM_EXP.has(e[1])?"unlockPremium()":\`unlockPack('\${esc(e[1])}')\`):\`openExperience('\${esc(e[1])}')\`;return \`<div class="card" onclick="\${action}"><div style="font-size:28px">\${e[0]}</div><h3>\${e[1]} \${locked?"🔒":""}</h3><p>\${e[2]}</p></div>\`};
+ const free=EXP.filter(e=>e[1]==="Se découvrir"),premium=EXP.filter(e=>PREMIUM_EXP.has(e[1])),packs=EXP.filter(e=>PACK_EXP.has(e[1]));
+ const freeEl=document.getElementById("experienceFreeCard"),premiumEl=document.getElementById("experiencePremiumCards"),packEl=document.getElementById("experiencePackCards");
+ if(freeEl)freeEl.innerHTML=free.map(card).join("");if(premiumEl)premiumEl.innerHTML=premium.map(card).join("");if(packEl)packEl.innerHTML=packs.map(card).join("");
+}
 let EN_EXP_MODE="a2",EN_EXP_PRESENCE="presentiel";
 let EN_GAME_MODE="a2",EN_GAME_PRESENCE="presentiel",EN_SELECTED_GAME="";let EN_PENDING_CHALLENGE_OPTS=null;
 
