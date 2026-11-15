@@ -630,7 +630,7 @@ function esc(s){return String(s).replace(/'/g,"\\\\'")}
 function hasPremium(){return isDemoMode() || !!S.premium || !!S.profile?.premium}
 function hasPack(name){return hasPremium() || !!S.packs?.includes(name)}
 function canOpenGame(name){return FREE_GAMES.has(name)||hasPremium()}
-function canOpenExperience(name){return name==="Se découvrir" || (PREMIUM_EXP.has(name)?hasPremium():PACK_EXP.has(name)?hasPack(name):true)}
+function canOpenExperience(name){return name==="Se découvrir" || (PREMIUM_EXP.has(name)?hasPremium():PACK_EXP.has(name)?true:true)}
 function renderCards(){
  gameCards.innerHTML=GAMES.map(g=>{const locked=!canOpenGame(g[1]);return '<div class="card" onclick="openGame(\''+esc(g[1])+'\')"><div style="font-size:28px">'+g[0]+'</div><h3>'+g[1]+' '+(locked?'🔒':'')+'</h3><p>'+g[2]+'</p></div>'}).join('');
  const makeCard=e=>{const locked=!canOpenExperience(e[1]);const action=locked?(PREMIUM_EXP.has(e[1])?'unlockPremium()':'unlockPack(\''+esc(e[1])+'\')'):'openExperience(\''+esc(e[1])+'\')';return '<div class="card" onclick="'+action+'"><div style="font-size:28px">'+e[0]+'</div><h3>'+e[1]+' '+(locked?'🔒':'')+'</h3><p>'+e[2]+'</p></div>'};
