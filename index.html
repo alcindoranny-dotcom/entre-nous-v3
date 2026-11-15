@@ -720,6 +720,7 @@ function unlockPack(name){startStripeCheckout("pack:"+name)}
 function unlockSpecializedBundle(){startStripeCheckout("pack:all_specialized")}
 
 async function startGame(name,opts={}){
+remotePartnerName=opts.partnerName||"";
 /* Une personne invitée rejoint gratuitement : une invitation ou opts.remote suffit à bypasser le paywall. */
 const inviteParam=new URLSearchParams(location.search).get("invite");
 const isRemoteInvite=!!opts.remote || !!inviteParam;
