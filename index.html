@@ -1303,7 +1303,9 @@ const shared=params.get("share");if(shared){setTimeout(()=>handleSharedQuestion(
  function renderHomeV8(){
    const home=document.getElementById("home");if(!home||!Array.isArray(GAMES)||!Array.isArray(EXP))return;
    const expCards=EXP.map(e=>'<div class="card" onclick="openExperience(\''+e[1].replace(/'/g,"\\'")+'\')"><div>'+e[0]+'</div><h3>'+e[1]+'</h3><p>'+e[2]+'</p></div>').join("");
-   const standardGames=GAMES.filter(g=>!["Lieux insolites","Dé des envies"].includes(g[1]));\n   const adultGames=GAMES.filter(g=>["Lieux insolites","Dé des envies"].includes(g[1]));\n   const gameCards=standardGames.map(g=>'<div class="card" onclick="openGame(\''+g[1].replace(/'/g,"\\'")+'\')"><div>'+g[0]+'</div><h3>'+g[1]+'</h3><p>'+g[2]+'</p></div>').join("");
+   const standardGames=GAMES.filter(g=>!["Lieux insolites","Dé des envies"].includes(g[1]));
+   const adultGames=GAMES.filter(g=>["Lieux insolites","Dé des envies"].includes(g[1]));
+   const gameCards=standardGames.map(g=>'<div class="card" onclick="openGame(\''+g[1].replace(/'/g,"\\'")+'\')"><div>'+g[0]+'</div><h3>'+g[1]+'</h3><p>'+g[2]+'</p></div>').join("");
    home.innerHTML='<div class="en-v8-home">'+
     '<section class="en-v8-welcome"><div class="en-v8-kicker">L’espace où les liens se créent</div><h1 class="en-v8-title">Et si on se <em style="color:#e3a0bd">découvrait</em> autrement ?</h1><p class="en-v8-copy">Des jeux, des questions et des moments à partager. À deux, entre amis ou en famille.</p><button class="btn" onclick="go(\'play\')">Commencer à jouer&nbsp; ↗</button> <button class="btn ghost" onclick="go(\'conceptInfo\')">Découvrir</button></section>'+
     '<section class="en-v8-section"><div class="en-v8-sectionhead"><h2>On fait quoi ?</h2><button onclick="go(\'experience\')">Tout découvrir ↗</button></div><div class="en-v8-featuregrid">'+
